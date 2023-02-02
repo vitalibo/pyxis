@@ -13,7 +13,7 @@ checkstyle: ## run static code analyser
 	$(PYTHON) -m pylint ./src/* ./tests/* --rcfile=.pylintrc
 
 test: ## run unit tests
-	PYTHONPATH="$$PYTHONPATH:./src/" $(PYTHON) -m pytest -p no:cacheprovider ./tests/
+	PYTHONPATH="$$PYTHONPATH:./src/" $(PYTHON) -m pytest -v -p no:cacheprovider ./tests/
 
 build: ## build wheel package
 	$(PYTHON) -m setup.py bdist_wheel
