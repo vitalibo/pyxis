@@ -123,6 +123,7 @@ good-names =
     dt,
     id,
     db,
+    of,
     _
 include-naming-hint = no
 inlinevar-naming-style = snake_case
