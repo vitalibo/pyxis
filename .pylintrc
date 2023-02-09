@@ -124,6 +124,7 @@ good-names =
     id,
     db,
     of,
+    kv,
     _
 include-naming-hint = no
 inlinevar-naming-style = snake_case

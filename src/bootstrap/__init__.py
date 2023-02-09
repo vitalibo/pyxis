@@ -1,4 +1,5 @@
-from .dataclasses import dataclass
+# pylint: disable=unused-import
+
 from .objects import (
     require_not_none,
     is_none,
@@ -6,3 +7,4 @@ from .objects import (
     identity
 )
 from .optional import Optional
+from .streams import Stream
