@@ -322,6 +322,37 @@ def test_enumerate_lazy():
     assert len(mock_iterable.mock_calls) == 4
 
 
+def test_zip():
+    stream1 = Stream.of(1, 2, 3)
+    stream2 = Stream.of('abcd')
+
+    actual = stream1.zip(stream2)
+
+    assert list(actual) == [(1, 'a'), (2, 'b'), (3, 'c'), (None, 'd')]
+
+
+def test_zip_lazy():
+    mock_iterable1 = IterableMock()
+    mock_iterable1.side_effect = [1, 2, 3, 4]
+    stream1 = Stream.of(mock_iterable1)
+    mock_iterable2 = IterableMock()
+    mock_iterable2.side_effect = [10, 20, 30]
+    stream2 = Stream.of(mock_iterable2)
+
+    actual = stream1.zip(stream2)
+
+    assert len(mock_iterable1.mock_calls) == 0  # lazy
+    assert len(mock_iterable2.mock_calls) == 0  # lazy
+    assert list(actual) == [(1, 10), (2, 20), (3, 30), (4, None)]
+    assert len(mock_iterable1.mock_calls) == 5  # +1 raise StopIteration
+    assert len(mock_iterable2.mock_calls) == 4  # +1 raise StopIteration
+    assert is_consumed(actual)
+    assert is_consumed(stream1)
+    assert is_consumed(stream2)
+    assert len(mock_iterable1.mock_calls) == 5
+    assert len(mock_iterable2.mock_calls) == 4
+
+
 def test_limit():
     stream = Stream.of(1, 2, 3, 4, 5)
 

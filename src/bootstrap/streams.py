@@ -207,6 +207,15 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         """
 
     @abstractmethod
+    def zip(self: Stream[T], other: Stream[V]) -> Stream[Tuple[T, V]]:
+        """
+        Returns a Stream consisting of the elements of this Stream merged with other Stream by element index.
+
+        :param other: second input Stream to zip
+        :return: the new pair Stream
+        """
+
+    @abstractmethod
     def limit(self: Stream[T], max_size: int) -> Stream[T]:
         """
         Returns a Stream consisting of the elements of this Stream, truncated to be no longer than max_size in length.
@@ -654,6 +663,9 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
 
     def enumerate(self) -> Stream[Tuple[int, T]]:
         return self.__class__(enumerate(self.__iterable), self)
+
+    def zip(self, other: Stream[V]) -> Stream[Tuple[T, V]]:
+        return self.__class__(itertools.zip_longest(self, require_not_none(other)))
 
     def limit(self, max_size: int) -> Stream[T]:
         return self.__class__(self.__limit(max_size, self.__iterable), self)
