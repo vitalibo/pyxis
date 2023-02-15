@@ -674,16 +674,16 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
         return self.__class__(self.__skip(n, self.__iterable), self)
 
     def take_while(self, predicate: Callable[[T], bool]) -> Stream[T]:
-        return self.__class__(self.__take_while(require_not_none(predicate), self.__iterable), self)
+        return self.__class__(itertools.takewhile(require_not_none(predicate), self.__iterable), self)
 
     def drop_while(self, predicate: Callable[[T], bool]) -> Stream[T]:
-        return self.__class__(self.__drop_while(require_not_none(predicate), self.__iterable), self)
+        return self.__class__(itertools.dropwhile(require_not_none(predicate), self.__iterable), self)
 
     def for_each(self, consumer: Callable[[T], None]) -> None:
         self.__for_each(require_not_none(consumer), self)
 
     def union(self, other: Stream[V]) -> Stream[Union[T, V]]:
-        return self.__class__(self.__union(self, require_not_none(other)))
+        return self.__class__(itertools.chain(self, require_not_none(other)))
 
     def transform(self, transform: Callable[[Stream[T]], Stream[V]]) -> Stream[V]:
         return require_not_none(transform)(self)
@@ -831,29 +831,6 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
                     break
 
             yield from iterator
-
-    @staticmethod
-    def __take_while(predicate: Callable[[T], bool], iterable: Iterable[T]):
-        for item in iterable:
-            if predicate(item):
-                yield item
-            else:
-                break
-
-    @staticmethod
-    def __drop_while(predicate: Callable[[T], bool], iterable: Iterable[T]):
-        iterator = iter(iterable)
-        for item in iterator:
-            if not predicate(item):
-                yield item
-                break
-
-        yield from iterator
-
-    @staticmethod
-    def __union(fist: Iterable[T], second: Iterable[T]):
-        yield from iter(fist)
-        yield from iter(second)
 
     @staticmethod
     def __for_each(consumer: Callable[[T], None], iterable: Iterable[T]):
