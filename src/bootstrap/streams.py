@@ -267,6 +267,15 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         """
 
     @abstractmethod
+    def materialize(self: Stream[T]) -> Stream[T]:
+        """
+        Materialize this Stream and returns a new Stream consisting of the same elements of this Stream
+        This is a terminal operation.
+
+        :return: a new Stream
+        """
+
+    @abstractmethod
     def for_each(self: Stream[T], consumer: Callable[[T], None]) -> None:
         """
         Performs an action for each element of this stream.
@@ -575,8 +584,9 @@ class _PipelineStage:
     Helper class for stream pipelines that contain no data manipulation logic
     """
 
-    def __init__(self, parent: _PipelineStage) -> None:
+    def __init__(self, parent: _PipelineStage, materialized=False) -> None:
         self.__parent = Optional.of_nullable(parent)
+        self.__materialized = materialized
         self.__consuming_state = self.__parent \
             .map(_PipelineStage.__is_consumed) \
             .or_else(False)
@@ -594,6 +604,9 @@ class _PipelineStage:
             .or_else(self.__consuming_state)  # pylint: disable=protected-access
 
     def __mark_as_consumed(self) -> None:
+        if self.__materialized:
+            return
+
         self.__consuming_state = True
         self.__parent.if_present(_PipelineStage.__mark_as_consumed)
 
@@ -604,8 +617,8 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
     A sequential implementation of Stream
     """
 
-    def __init__(self, iterable: Iterable[T], parent=None) -> None:
-        super().__init__(parent)
+    def __init__(self, iterable: Iterable[T], parent=None, **kwargs) -> None:
+        super().__init__(parent, **kwargs)
         self.__iterable = iterable
 
     @classmethod
@@ -660,8 +673,11 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
     def union(self, other: Stream[V]) -> Stream[Union[T, V]]:
         return self.__class__(self.__union(self, require_not_none(other)))
 
-    def transform(self: Stream[T], transform: Callable[[Stream[T]], Stream[V]]) -> Stream[V]:
+    def transform(self, transform: Callable[[Stream[T]], Stream[V]]) -> Stream[V]:
         return require_not_none(transform)(self)
+
+    def materialize(self) -> Stream[T]:
+        return self.__class__(self.to_list(), materialized=True)
 
     def collect(self, collector: Callable[[Iterator[T]], V]) -> V:
         return require_not_none(collector)(iter(self))

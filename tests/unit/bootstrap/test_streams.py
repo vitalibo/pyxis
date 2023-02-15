@@ -609,6 +609,40 @@ def test_transform_lazy():
     assert len(mock_iterable.mock_calls) == 4
 
 
+def test_materialize():
+    stream = Stream.of('abc')
+
+    actual = stream.materialize()
+
+    assert list(actual) == ['a', 'b', 'c']
+    assert list(actual) == ['a', 'b', 'c']
+    child1 = actual.map(lambda x: (x, x.upper()))
+    assert list(child1) == [('a', 'A'), ('b', 'B'), ('c', 'C')]
+    assert is_consumed(child1)
+    child2 = actual.map(lambda x: (x, ord(x)))
+    assert list(child2) == [('a', 97), ('b', 98), ('c', 99)]
+    assert is_consumed(child2)
+
+
+def test_materialize_lazy():
+    mock_iterable = IterableMock()
+    mock_iterable.side_effect = ['a', 'b', 'c']
+    stream = Stream.of(mock_iterable)
+
+    actual = stream.materialize()
+
+    assert len(mock_iterable.mock_calls) == 4  # lazy / +1 raise StopIteration
+    assert list(actual) == ['a', 'b', 'c']
+    assert is_consumed(stream)
+    assert len(mock_iterable.mock_calls) == 4
+    assert list(actual) == ['a', 'b', 'c']
+    assert len(mock_iterable.mock_calls) == 4
+    assert list(actual.map(str.upper)) == ['A', 'B', 'C']
+    assert len(mock_iterable.mock_calls) == 4
+    assert list(actual.map(str.lower)) == ['a', 'b', 'c']
+    assert len(mock_iterable.mock_calls) == 4
+
+
 def test_for_each():
     stream = Stream.of('abc')
     mock_consumer = mock.Mock()
