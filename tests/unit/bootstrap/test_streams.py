@@ -353,6 +353,84 @@ def test_zip_lazy():
     assert len(mock_iterable2.mock_calls) == 4
 
 
+def test_window():
+    stream = Stream.of('abcdefg')
+
+    actual = stream.window(3)
+
+    assert list(actual) == [('a', 'b', 'c'), ('d', 'e', 'f'), ('g',)]
+
+
+def test_window_empty():
+    stream = Stream.empty()
+
+    actual = stream.window(3)
+
+    assert list(actual) == []
+
+
+def test_window_full():
+    stream = Stream.of('abcdef')
+
+    actual = stream.window(2)
+
+    assert list(actual) == [('a', 'b'), ('c', 'd'), ('e', 'f')]
+
+
+def test_window_lazy():
+    mock_iterable = IterableMock()
+    mock_iterable.side_effect = [1, 2, 3, 4, 5]
+    stream = Stream.of(mock_iterable)
+
+    actual = stream.window(3)
+
+    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert list(actual) == [(1, 2, 3), (4, 5,)]
+    assert len(mock_iterable.mock_calls) == 6  # +1 raise StopIteration
+    assert is_consumed(actual)
+    assert is_consumed(stream)
+    assert len(mock_iterable.mock_calls) == 6
+
+
+def test_sliding_window():
+    stream = Stream.of('abcde')
+
+    actual = stream.sliding_window(3)
+
+    assert list(actual) == [('a', 'b', 'c'), ('b', 'c', 'd'), ('c', 'd', 'e')]
+
+
+def test_sliding_window_empty():
+    stream = Stream.empty()
+
+    actual = stream.sliding_window(3)
+
+    assert list(actual) == []
+
+
+def test_sliding_window_less():
+    stream = Stream.of('abc')
+
+    actual = stream.sliding_window(4)
+
+    assert list(actual) == [('a', 'b', 'c')]
+
+
+def test_sliding_window_lazy():
+    mock_iterable = IterableMock()
+    mock_iterable.side_effect = [1, 2, 3, 4, 5]
+    stream = Stream.of(mock_iterable)
+
+    actual = stream.sliding_window(3)
+
+    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert list(actual) == [(1, 2, 3), (2, 3, 4), (3, 4, 5)]
+    assert len(mock_iterable.mock_calls) == 6  # +1 raise StopIteration
+    assert is_consumed(actual)
+    assert is_consumed(stream)
+    assert len(mock_iterable.mock_calls) == 6
+
+
 def test_limit():
     stream = Stream.of(1, 2, 3, 4, 5)
 

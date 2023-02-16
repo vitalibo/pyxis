@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections
 import contextlib
 import functools
 import itertools
@@ -213,6 +214,24 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param other: second input Stream to zip
         :return: the new pair Stream
+        """
+
+    @abstractmethod
+    def window(self: Stream[T], n: int) -> Stream[Iterable[T]]:
+        """
+        Returns a Stream consisting of the elements of this Stream batched in window with N-length.
+
+        :param n: width of the window
+        :return: the new Stream
+        """
+
+    @abstractmethod
+    def sliding_window(self: Stream[T], n: int) -> Stream[Iterable[T]]:
+        """
+        Returns a Stream consisting of the elements of this Stream batched in sliding window with N-length.
+
+        :param n: width of the window
+        :return: the new Stream
         """
 
     @abstractmethod
@@ -667,6 +686,12 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
     def zip(self, other: Stream[V]) -> Stream[Tuple[T, V]]:
         return self.__class__(itertools.zip_longest(self, require_not_none(other)))
 
+    def window(self, n: int) -> Stream[Iterable[T]]:
+        return self.__class__(self.__window(require_not_none(n), self))
+
+    def sliding_window(self, n: int) -> Stream[Iterable[T]]:
+        return self.__class__(self.__sliding_window(require_not_none(n), self))
+
     def limit(self, max_size: int) -> Stream[T]:
         return self.__class__(self.__limit(max_size, self.__iterable), self)
 
@@ -807,6 +832,26 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
         for item in iterable:
             consumer(item)
             yield item
+
+    @staticmethod
+    def __window(n: int, iterable: Iterable[T]):
+        iterator = iter(iterable)
+        while True:
+            window = tuple(itertools.islice(iterator, n))
+            if not window:
+                break
+            yield window
+
+    @staticmethod
+    def __sliding_window(n: int, iterable: Iterable[T]):
+        iterator = iter(iterable)
+        window = collections.deque(maxlen=n)
+        window.extend(itertools.islice(iterator, n))
+        if len(window) > 0:
+            yield tuple(window)
+        for item in iterator:
+            window.append(item)
+            yield tuple(window)
 
     @staticmethod
     def __limit(max_size: int, iterable: Iterable[T]):
