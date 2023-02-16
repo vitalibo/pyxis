@@ -1376,7 +1376,7 @@ def test_group_by():
 
     actual = stream.group_by(len)
 
-    assert list(actual) == [(2, ['aa', 'bb']), (3, ['ccc'])]
+    assert list(actual) == [(2, ('aa', 'bb')), (3, ('ccc',))]
 
 
 def test_group_by_empty():
@@ -1392,7 +1392,7 @@ def test_group_by_downstream():
 
     actual = stream.group_by(len, downstream=str.upper)
 
-    assert list(actual) == [(2, ['AA', 'BB']), (3, ['CCC'])]
+    assert list(actual) == [(2, ('AA', 'BB')), (3, ('CCC',))]
 
 
 def test_group_by_lazy():
@@ -1407,7 +1407,7 @@ def test_group_by_lazy():
     actual = stream.group_by(mock_classifier, mock_downstream)
 
     assert len(mock_iterable.mock_calls) == 0  # lazy
-    assert list(actual) == [(1, [10, 20]), (2, [30])]
+    assert list(actual) == [(1, (10, 20)), (2, (30,))]
     assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
     assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
@@ -1422,7 +1422,7 @@ def test_group_by_key():
 
     actual = stream.group_by_key()
 
-    assert list(actual) == [(1, ['a', 'd']), (2, ['b', 'c'])]
+    assert list(actual) == [(1, ('a', 'd')), (2, ('b', 'c'))]
 
 
 def test_group_by_key_downstream():
@@ -1430,7 +1430,7 @@ def test_group_by_key_downstream():
 
     actual = stream.group_by_key(str.upper)
 
-    assert list(actual) == [(1, ['A', 'D']), (2, ['B', 'C'])]
+    assert list(actual) == [(1, ('A', 'D')), (2, ('B', 'C'))]
 
 
 def test_group_by_key_lazy():
@@ -1443,7 +1443,7 @@ def test_group_by_key_lazy():
     actual = stream.group_by_key(mock_downstream)
 
     assert len(mock_iterable.mock_calls) == 0  # lazy
-    assert list(actual) == [(1, [10]), (2, [20, 30])]
+    assert list(actual) == [(1, (10,)), (2, (20, 30))]
     assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
     assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4

@@ -784,7 +784,7 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
     def group_by_key(self, downstream: Callable[[V], T] = identity) -> Stream[Tuple[K, Iterable[T]]]:
         return self \
             .__group_by_key(require_not_none(downstream)) \
-            .map_values(list)
+            .map_values(tuple)
 
     def reduce_by_key(self, accumulator: Callable[[T, V], T], initial: T = _not_defined) -> Stream[Tuple[K, T]]:
         return self.__reduce_by_key(require_not_none(accumulator), initial)
