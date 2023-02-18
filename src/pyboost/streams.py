@@ -815,12 +815,12 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         >>> stream = Stream.of('aa', 'ccc', 'bb')
         >>> stream = stream.group_by(len)
         >>> print(list(stream))
-        >>> [(2, ('aa', 'bb')), (3, ('ccc',))]
+        ... [(2, ('aa', 'bb')), (3, ('ccc',))]
 
         >>> stream = Stream.of('aa', 'ccc', 'bb')
         >>> stream = stream.group_by(len, downstream=str.upper)
         >>> print(list(stream))
-        >>> [(2, ('AA', 'BB')), (3, ('CCC',))]
+        ... [(2, ('AA', 'BB')), (3, ('CCC',))]
         """
 
     @overload
