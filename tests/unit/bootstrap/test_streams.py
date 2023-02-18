@@ -48,7 +48,7 @@ def test_generate_lazy():
 
     actual = Stream.generate(mock_supplier)
 
-    assert len(mock_supplier.mock_calls) == 0  # lazy
+    assert len(mock_supplier.mock_calls) == 0
     assert list(actual.limit(3)) == [1, 2, 3]
     assert len(mock_supplier.mock_calls) == 3
 
@@ -88,11 +88,10 @@ def test_filter_lazy():
 
     actual = stream.filter(mock_predicate)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [1, 3]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_predicate.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -115,11 +114,10 @@ def test_map_lazy():
 
     actual = stream.map(mock_mapper)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == ['A', 'B', 'C']
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_mapper.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -142,11 +140,10 @@ def test_flat_map_lazy():
 
     actual = stream.flat_map(mock_mapper)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [1, 'A', 2, 'B', 3, 'C']
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_mapper.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -177,11 +174,10 @@ def test_distinct_lazy():
 
     actual = stream.distinct(mock_comparator)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [1, 2]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_comparator.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -228,11 +224,10 @@ def test_sorted_lazy():
 
     actual = stream.sorted(mock_comparator, reverse=True)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [2, 1, 3]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_comparator.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -246,7 +241,7 @@ def test_reversed():
     assert list(actual) == [2, 3, 1]
 
 
-def test_reversed_generator():  # generator is not reversible
+def test_reversed_generator():
     stream = Stream.of((x for x in (1, 3, 2)))
 
     actual = stream.reversed()
@@ -261,11 +256,10 @@ def test_reversed_lazy():
 
     actual = stream.reversed()
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [3, 2, 1]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -288,11 +282,10 @@ def test_peek_lazy():
 
     actual = stream.peek(mock_consumer)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [1, 2, 3]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_consumer.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -313,11 +306,10 @@ def test_enumerate_lazy():
 
     actual = stream.enumerate()
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [(0, 1), (1, 2), (2, 3)]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -341,11 +333,11 @@ def test_zip_lazy():
 
     actual = stream1.zip(stream2)
 
-    assert len(mock_iterable1.mock_calls) == 0  # lazy
-    assert len(mock_iterable2.mock_calls) == 0  # lazy
+    assert len(mock_iterable1.mock_calls) == 0
+    assert len(mock_iterable2.mock_calls) == 0
     assert list(actual) == [(1, 10), (2, 20), (3, 30), (4, None)]
-    assert len(mock_iterable1.mock_calls) == 5  # +1 raise StopIteration
-    assert len(mock_iterable2.mock_calls) == 4  # +1 raise StopIteration
+    assert len(mock_iterable1.mock_calls) == 5
+    assert len(mock_iterable2.mock_calls) == 4
     assert is_consumed(actual)
     assert is_consumed(stream1)
     assert is_consumed(stream2)
@@ -366,7 +358,7 @@ def test_window_empty():
 
     actual = stream.window(3)
 
-    assert list(actual) == []
+    assert not list(actual)
 
 
 def test_window_full():
@@ -384,9 +376,9 @@ def test_window_lazy():
 
     actual = stream.window(3)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [(1, 2, 3), (4, 5,)]
-    assert len(mock_iterable.mock_calls) == 6  # +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 6
     assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 6
@@ -405,7 +397,7 @@ def test_sliding_window_empty():
 
     actual = stream.sliding_window(3)
 
-    assert list(actual) == []
+    assert not list(actual)
 
 
 def test_sliding_window_less():
@@ -423,9 +415,9 @@ def test_sliding_window_lazy():
 
     actual = stream.sliding_window(3)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [(1, 2, 3), (2, 3, 4), (3, 4, 5)]
-    assert len(mock_iterable.mock_calls) == 6  # +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 6
     assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 6
@@ -478,11 +470,10 @@ def test_limit_lazy():
 
     actual = stream.limit(3)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [1, 2, 3]
     assert len(mock_iterable.mock_calls) == 3
     assert is_consumed(actual)
-    assert len(mock_iterable.mock_calls) == 3
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 3
 
@@ -494,11 +485,10 @@ def test_limit_more_lazy():
 
     actual = stream.limit(5)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [1, 2, 3]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -550,11 +540,10 @@ def test_skip_lazy():
 
     actual = stream.skip(3)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [4, 5]
-    assert len(mock_iterable.mock_calls) == 6  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 6
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 6
 
@@ -566,11 +555,10 @@ def test_skip_more_lazy():
 
     actual = stream.skip(3)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert not list(actual)
-    assert len(mock_iterable.mock_calls) == 3  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 3
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 3
 
@@ -608,11 +596,10 @@ def test_take_while_lazy():
 
     actual = stream.take_while(mock_predicate)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [1, 2]
     assert len(mock_iterable.mock_calls) == 3
     assert is_consumed(actual)
-    assert len(mock_iterable.mock_calls) == 3
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 3
     assert mock_predicate.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -651,11 +638,10 @@ def test_drop_while_lazy():
 
     actual = stream.drop_while(mock_predicate)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [3, 4]
-    assert len(mock_iterable.mock_calls) == 5  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 5
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 5
     assert mock_predicate.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -680,12 +666,10 @@ def test_union_lazy():
 
     actual = stream1.union(stream2)
 
-    assert len(mock_iterable1.mock_calls) == 0  # lazy
-    assert len(mock_iterable2.mock_calls) == 0  # lazy
+    assert len(mock_iterable1.mock_calls) == 0
+    assert len(mock_iterable2.mock_calls) == 0
     assert list(actual) == [1, 2, 3, 10, 20, 30]
     assert is_consumed(actual)
-    assert len(mock_iterable1.mock_calls) == 4  # +1 raise StopIteration
-    assert len(mock_iterable2.mock_calls) == 4  # +1 raise StopIteration
     assert is_consumed(stream1)
     assert is_consumed(stream2)
     assert len(mock_iterable1.mock_calls) == 4
@@ -711,9 +695,9 @@ def test_transform_lazy():
 
     actual = stream.transform(stub)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == ['A', 'B', 'C']
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -740,7 +724,7 @@ def test_materialize_lazy():
 
     actual = stream.materialize()
 
-    assert len(mock_iterable.mock_calls) == 4  # lazy / +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert list(actual) == ['a', 'b', 'c']
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
@@ -769,7 +753,7 @@ def test_for_each_lazy():
 
     stream.for_each(mock_consumer)
 
-    assert len(mock_iterable.mock_calls) == 4  # terminal operation / +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_consumer.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -793,7 +777,7 @@ def test_collector_lazy():
 
     assert isinstance(actual, List)
     assert actual == [1, 2, 3]
-    assert len(mock_iterable.mock_calls) == 4  # terminal operation / +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -819,8 +803,8 @@ def test_iterator_lazy():
     actual = stream.iterator()
 
     assert isinstance(actual, Iterator)
-    assert len(mock_iterable.mock_calls) == 0  # lazy
-    assert is_consumed(stream)  # terminal operation
+    assert len(mock_iterable.mock_calls) == 0
+    assert is_consumed(stream)
     assert next(actual) == 1
     assert len(mock_iterable.mock_calls) == 1
     assert is_consumed(stream)
@@ -912,7 +896,7 @@ def test_reduce_lazy():
     assert isinstance(actual, Optional)
     assert actual.is_present()
     assert actual.get() == 20
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert is_consumed(stream)
     assert mock_accumulator.call_args_list == [mock.call(1, 2), mock.call(10, 3)]
 
@@ -959,7 +943,7 @@ def test_min_lazy():
     assert isinstance(actual, Optional)
     assert actual.is_present()
     assert actual.get() == 2
-    assert len(mock_iterable.mock_calls) == 4  # terminal operation / +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert is_consumed(stream)
     assert mock_comparator.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
 
@@ -1006,7 +990,7 @@ def test_max_lazy():
     assert isinstance(actual, Optional)
     assert actual.is_present()
     assert actual.get() == 1
-    assert len(mock_iterable.mock_calls) == 4  # terminal operation / +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert is_consumed(stream)
     assert mock_comparator.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
 
@@ -1035,7 +1019,7 @@ def test_count_lazy():
     actual = stream.count()
 
     assert actual == 3
-    assert len(mock_iterable.mock_calls) == 4  # terminal operation / +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -1090,7 +1074,7 @@ def test_any_match_lazy():
     actual = stream.any_match(mock_predicate)
 
     assert actual
-    assert len(mock_iterable.mock_calls) == 2  # lazy
+    assert len(mock_iterable.mock_calls) == 2
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 2
     assert mock_predicate.call_args_list == [mock.call(1), mock.call(2)]
@@ -1146,7 +1130,7 @@ def test_all_match_lazy():
     actual = stream.all_match(mock_predicate)
 
     assert not actual
-    assert len(mock_iterable.mock_calls) == 3  # lazy
+    assert len(mock_iterable.mock_calls) == 3
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 3
     assert mock_predicate.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -1202,7 +1186,7 @@ def test_none_match_lazy():
     actual = stream.none_match(mock_predicate)
 
     assert actual
-    assert len(mock_iterable.mock_calls) == 4  # lazy
+    assert len(mock_iterable.mock_calls) == 4
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_predicate.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -1237,7 +1221,7 @@ def test_find_first_lazy():
     assert isinstance(actual, Optional)
     assert actual.is_present()
     assert actual.get() == 1
-    assert len(mock_iterable.mock_calls) == 1  # terminal operation
+    assert len(mock_iterable.mock_calls) == 1
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 1
 
@@ -1259,11 +1243,10 @@ def test_key_by_lazy():
 
     actual = stream.key_by(mock_mapper)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [('a', 1), ('b', 2), ('c', 3)]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_mapper.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -1284,11 +1267,10 @@ def test_keys_lazy():
 
     actual = stream.keys()
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == ['a', 'b', 'c']
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -1308,11 +1290,10 @@ def test_values_lazy():
 
     actual = stream.values()
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [1, 2, 3]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -1334,11 +1315,10 @@ def test_map_values_lazy():
 
     actual = stream.map_values(mock_mapper)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [('a', 10), ('b', 20), ('c', 30)]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_mapper.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -1361,11 +1341,10 @@ def test_flat_map_values_lazy():
 
     actual = stream.flat_map_values(mock_mapper)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [('a', 10), ('a', 20), ('b', 30)]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_mapper.call_args_list == [mock.call(1), mock.call(2), mock.call(3)]
@@ -1406,11 +1385,10 @@ def test_group_by_lazy():
 
     actual = stream.group_by(mock_classifier, mock_downstream)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [(1, (10, 20)), (2, (30,))]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_classifier.call_args_list == [mock.call('a'), mock.call('b'), mock.call('c')]
@@ -1442,11 +1420,10 @@ def test_group_by_key_lazy():
 
     actual = stream.group_by_key(mock_downstream)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [(1, (10,)), (2, (20, 30))]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_downstream.call_args_list == [mock.call('a'), mock.call('b'), mock.call('c')]
@@ -1477,11 +1454,10 @@ def test_reduce_by_key_lazy():
 
     actual = stream.reduce_by_key(mock_accumulator, 'd')
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(actual) == [(1, 10), (2, 30)]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(actual)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(actual)
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
     assert mock_accumulator.call_args_list == [mock.call('d', 'a'), mock.call('d', 'b'), mock.call(20, 'c')]
@@ -1530,7 +1506,7 @@ def test_joining_lazy():
 
     actual = stream.joining()
 
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert isinstance(actual, str)
     assert actual == 'abc'
     assert is_consumed(stream)
@@ -1569,9 +1545,9 @@ def test_pipeline_consumed_lazy():
     mock_iterable.side_effect = [1, 2, 3]
     stream = Stream.of(mock_iterable)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(stream) == [1, 2, 3]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
+    assert len(mock_iterable.mock_calls) == 4
     assert is_consumed(stream)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -1583,11 +1559,10 @@ def test_pipeline_children_consumed_lazy():
     child_stream_a = parent_stream.map(lambda x: x + 1)
     child_stream_b = parent_stream.map(lambda x: x + 2)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(parent_stream) == [1, 2, 3]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(child_stream_a)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(child_stream_a)
     assert is_consumed(child_stream_b)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -1599,11 +1574,10 @@ def test_pipeline_parent_consumed_lazy():
     child_stream_a = parent_stream.map(lambda x: x + 1)
     child_stream_b = parent_stream.map(lambda x: x + 2)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(child_stream_a) == [2, 3, 4]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(parent_stream)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(parent_stream)
     assert is_consumed(child_stream_b)
     assert len(mock_iterable.mock_calls) == 4
 
@@ -1615,11 +1589,10 @@ def test_pipeline_children_deep_consumed_lazy():
     child_stream_a = parent_stream.map(lambda x: x + 1)
     child_stream_b = child_stream_a.map(lambda x: x + 2)
 
-    assert len(mock_iterable.mock_calls) == 0  # lazy
+    assert len(mock_iterable.mock_calls) == 0
     assert list(parent_stream) == [1, 2, 3]
-    assert len(mock_iterable.mock_calls) == 4  # +1 raise StopIteration
-    assert is_consumed(child_stream_a)
     assert len(mock_iterable.mock_calls) == 4
+    assert is_consumed(child_stream_a)
     assert is_consumed(child_stream_b)
     assert len(mock_iterable.mock_calls) == 4
 
