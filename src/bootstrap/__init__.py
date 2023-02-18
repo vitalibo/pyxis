@@ -6,5 +6,5 @@ from .objects import (
     not_none,
     identity
 )
-from .optional import Optional
+from .option import Option
 from .streams import Stream

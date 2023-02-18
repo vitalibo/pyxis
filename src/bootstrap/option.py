@@ -5,7 +5,7 @@ from typing import (
 )
 
 __all__ = [
-    'Optional'
+    'Option'
 ]
 
 from .objects import require_not_none
@@ -14,17 +14,17 @@ T = TypeVar('T')
 U = TypeVar('U')
 
 
-class Optional(Generic[T]):
+class Option(Generic[T]):
     """ A container object which may or may not contain a non-none value """
 
     def __init__(self, value: T) -> None:
         self.__value = value
 
     @staticmethod
-    def empty() -> Optional[T]:
+    def empty() -> Option[T]:
         return _Empty()
 
-    def filter(self, predicate: Callable[[T], bool]) -> Optional[T]:
+    def filter(self, predicate: Callable[[T], bool]) -> Option[T]:
         require_not_none(predicate)
 
         if self.is_empty():
@@ -35,7 +35,7 @@ class Optional(Generic[T]):
         else:
             return self.empty()
 
-    def flat_map(self, mapper: Callable[[T], Optional[U]]) -> Optional[U]:
+    def flat_map(self, mapper: Callable[[T], Option[U]]) -> Option[U]:
         require_not_none(mapper)
 
         if self.is_empty():
@@ -70,26 +70,26 @@ class Optional(Generic[T]):
     def is_present(self) -> bool:
         return self.__value is not None
 
-    def map(self, mapper: Callable[[T], U]) -> Optional[U]:
+    def map(self, mapper: Callable[[T], U]) -> Option[U]:
         require_not_none(mapper)
 
         if self.is_empty():
             return self.empty()
 
-        return Optional.of_nullable(mapper(self.__value))
+        return Option.of_nullable(mapper(self.__value))
 
     @staticmethod
-    def of(value: T) -> Optional[T]:
-        return Optional(require_not_none(value))
+    def of(value: T) -> Option[T]:
+        return Option(require_not_none(value))
 
     @staticmethod
-    def of_nullable(value: T) -> Optional[T]:
+    def of_nullable(value: T) -> Option[T]:
         if value is None:
-            return Optional.empty()
+            return Option.empty()
         else:
-            return Optional(value)
+            return Option(value)
 
-    def __or__(self, other: Optional[T]) -> Optional[T]:
+    def __or__(self, other: Option[T]) -> Option[T]:
         if self.is_present():
             return self
         else:
@@ -129,7 +129,7 @@ class Optional(Generic[T]):
         return self.is_present()
 
     def __eq__(self, other) -> bool:
-        if isinstance(other, Optional):
+        if isinstance(other, Option):
             return self.__value == other.__value  # pylint: disable=protected-access
         return False
 
@@ -137,17 +137,17 @@ class Optional(Generic[T]):
         return hash(self.__value)
 
     def __repr__(self):
-        return f'Optional({repr(self.__value)})'
+        return f'Option({repr(self.__value)})'
 
 
-class _Empty(Optional):
-    """ Common instance of Optional for empty value """
+class _Empty(Option):
+    """ Common instance of Option for empty value """
 
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
-            cls.__instance = Optional(None)
+            cls.__instance = Option(None)
         return cls.__instance
 
     def is_empty(self) -> bool:

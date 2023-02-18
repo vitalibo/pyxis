@@ -2,41 +2,41 @@ from unittest import mock
 
 import pytest
 
-from bootstrap.optional import Optional, _Empty
+from bootstrap.option import Option, _Empty
 
 
 def test_empty():
-    actual = Optional.empty()
+    actual = Option.empty()
 
     assert hash(actual) == hash(_Empty())
     assert hash(actual) == hash(None)
 
 
 def test_of():
-    actual = Optional.of('foo')
+    actual = Option.of('foo')
 
     assert hash(actual) == hash('foo')
 
 
 def test_of_raise():
     with pytest.raises(ValueError):
-        Optional.of(None)
+        Option.of(None)
 
 
 def test_of_nullable():
-    actual = Optional.of_nullable('foo')
+    actual = Option.of_nullable('foo')
 
     assert hash(actual) == hash('foo')
 
 
 def test_of_nullable_none():
-    actual = Optional.of_nullable(None)
+    actual = Option.of_nullable(None)
 
-    assert actual == Optional.empty()
+    assert actual == Option.empty()
 
 
 def test_get():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     actual = obj.get()
 
@@ -44,7 +44,7 @@ def test_get():
 
 
 def test_get_raise():
-    obj = Optional.empty()
+    obj = Option.empty()
 
     with pytest.raises(ValueError) as e:
         obj.get()
@@ -53,114 +53,114 @@ def test_get_raise():
 
 
 def test_is_empty():
-    obj = Optional.empty()
+    obj = Option.empty()
 
     assert obj.is_empty()
 
 
 def test_is_not_empty():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     assert not obj.is_empty()
 
 
 def test_is_present():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     assert obj.is_present()
 
 
 def test_is_not_present():
-    obj = Optional.empty()
+    obj = Option.empty()
 
     assert not obj.is_present()
 
 
 def test_filter():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_predicate = mock.Mock()
     mock_predicate.return_value = True
 
     actual = obj.filter(mock_predicate)
 
     assert actual == obj
-    assert actual != Optional.empty()
+    assert actual != Option.empty()
     mock_predicate.assert_called_once_with('foo')
 
 
 def test_filter_not_pass():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_predicate = mock.Mock()
     mock_predicate.return_value = False
 
     actual = obj.filter(mock_predicate)
 
     assert actual != obj
-    assert actual == Optional.empty()
+    assert actual == Option.empty()
     mock_predicate.assert_called_once_with('foo')
 
 
 def test_filter_empty():
-    obj = Optional.empty()
+    obj = Option.empty()
     mock_predicate = mock.Mock()
     mock_predicate.return_value = True
 
     actual = obj.filter(mock_predicate)
 
     assert actual == obj
-    assert actual == Optional.empty()
+    assert actual == Option.empty()
     mock_predicate.assert_not_called()
 
 
 def test_filter_predicate_is_none():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     with pytest.raises(ValueError):
         obj.filter(None)
 
 
 def test_flat_map():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_mapper = mock.Mock()
-    mock_mapper.return_value = Optional.of('bar')
+    mock_mapper.return_value = Option.of('bar')
 
     actual = obj.flat_map(mock_mapper)
 
-    assert actual == Optional.of('bar')
+    assert actual == Option.of('bar')
     mock_mapper.assert_called_once_with('foo')
 
 
 def test_flat_map_return_empty():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_mapper = mock.Mock()
-    mock_mapper.return_value = Optional.empty()
+    mock_mapper.return_value = Option.empty()
 
     actual = obj.flat_map(mock_mapper)
 
-    assert actual == Optional.empty()
+    assert actual == Option.empty()
     mock_mapper.assert_called_once_with('foo')
 
 
 def test_flat_map_empty():
-    obj = Optional.empty()
+    obj = Option.empty()
     mock_mapper = mock.Mock()
-    mock_mapper.return_value = Optional.empty()
+    mock_mapper.return_value = Option.empty()
 
     actual = obj.flat_map(mock_mapper)
 
-    assert actual == Optional.empty()
+    assert actual == Option.empty()
     mock_mapper.assert_not_called()
 
 
 def test_flat_map_mapper_is_none():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     with pytest.raises(ValueError):
         obj.flat_map(None)
 
 
 def test_if_present():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_action = mock.Mock()
 
     obj.if_present(mock_action)
@@ -169,7 +169,7 @@ def test_if_present():
 
 
 def test_if_present_not_called():
-    obj = Optional.empty()
+    obj = Option.empty()
     mock_action = mock.Mock()
 
     obj.if_present(mock_action)
@@ -178,14 +178,14 @@ def test_if_present_not_called():
 
 
 def test_if_present_action_is_none():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     with pytest.raises(ValueError):
         obj.if_present(None)
 
 
 def test_if_present_or_else():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_action = mock.Mock()
     mock_empty_action = mock.Mock()
 
@@ -196,7 +196,7 @@ def test_if_present_or_else():
 
 
 def test_if_present_or_else_empty():
-    obj = Optional.empty()
+    obj = Option.empty()
     mock_action = mock.Mock()
     mock_empty_action = mock.Mock()
 
@@ -207,7 +207,7 @@ def test_if_present_or_else_empty():
 
 
 def test_if_present_or_else_action_is_none():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_empty_action = mock.Mock()
 
     with pytest.raises(ValueError):
@@ -215,7 +215,7 @@ def test_if_present_or_else_action_is_none():
 
 
 def test_if_present_or_else_empty_action_is_none():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_action = mock.Mock()
 
     with pytest.raises(ValueError):
@@ -223,48 +223,48 @@ def test_if_present_or_else_empty_action_is_none():
 
 
 def test_map():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_mapper = mock.Mock()
     mock_mapper.return_value = 'bar'
 
     actual = obj.map(mock_mapper)
 
-    assert actual == Optional.of('bar')
+    assert actual == Option.of('bar')
     mock_mapper.assert_called_once_with('foo')
 
 
 def test_map_return_none():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_mapper = mock.Mock()
     mock_mapper.return_value = None
 
     actual = obj.map(mock_mapper)
 
-    assert actual == Optional.empty()
+    assert actual == Option.empty()
     mock_mapper.assert_called_once_with('foo')
 
 
 def test_map_empty():
-    obj = Optional.empty()
+    obj = Option.empty()
     mock_mapper = mock.Mock()
     mock_mapper.return_value = 'bar'
 
     actual = obj.map(mock_mapper)
 
-    assert actual == Optional.empty()
+    assert actual == Option.empty()
     mock_mapper.assert_not_called()
 
 
 def test_map_mapper_is_none():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     with pytest.raises(ValueError):
         obj.map(None)
 
 
 def test_or():
-    obj1 = Optional.of('foo')
-    obj2 = Optional.of('bar')
+    obj1 = Option.of('foo')
+    obj2 = Option.of('bar')
 
     actual = obj1 or obj2
 
@@ -272,8 +272,8 @@ def test_or():
 
 
 def test_or_empty():
-    obj1 = Optional.empty()
-    obj2 = Optional.of('bar')
+    obj1 = Option.empty()
+    obj2 = Option.of('bar')
 
     actual = obj1 or obj2
 
@@ -281,16 +281,16 @@ def test_or_empty():
 
 
 def test_or_both_empty():
-    obj1 = Optional.empty()
-    obj2 = Optional.empty()
+    obj1 = Option.empty()
+    obj2 = Option.empty()
 
     actual = obj1 or obj2
 
     assert actual == obj2
 
 
-def test_or_empty_not_optional():
-    obj1 = Optional.empty()
+def test_or_empty_not_option():
+    obj1 = Option.empty()
     obj2 = 'bar'
 
     actual = obj1 or obj2
@@ -299,7 +299,7 @@ def test_or_empty_not_optional():
 
 
 def test_or_else():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     actual = obj.or_else('bar')
 
@@ -307,7 +307,7 @@ def test_or_else():
 
 
 def test_or_else_empty():
-    obj = Optional.empty()
+    obj = Option.empty()
 
     actual = obj.or_else('bar')
 
@@ -315,7 +315,7 @@ def test_or_else_empty():
 
 
 def test_or_else_get():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
     mock_supplier = mock.Mock()
     mock_supplier.return_value = 'bar'
 
@@ -326,7 +326,7 @@ def test_or_else_get():
 
 
 def test_or_else_get_empty():
-    obj = Optional.empty()
+    obj = Option.empty()
     mock_supplier = mock.Mock()
     mock_supplier.return_value = 'bar'
 
@@ -337,14 +337,14 @@ def test_or_else_get_empty():
 
 
 def test_or_else_get_supplier_is_none():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     with pytest.raises(ValueError):
         obj.or_else_get(None)
 
 
 def test_or_else_raise_not_raised():
-    obj = Optional.of('foo')
+    obj = Option.of('foo')
 
     actual = obj.or_else_raise()
 
@@ -352,7 +352,7 @@ def test_or_else_raise_not_raised():
 
 
 def test_or_else_raise():
-    obj = Optional.empty()
+    obj = Option.empty()
 
     with pytest.raises(ValueError) as e:
         obj.or_else_raise()
@@ -361,31 +361,31 @@ def test_or_else_raise():
 
 
 def test_or_else_raise_custom_error():
-    obj = Optional.empty()
+    obj = Option.empty()
 
     with pytest.raises(KeyError):
         obj.or_else_raise(KeyError)
 
 
 def test_bool():
-    assert Optional.of('foo')
-    assert not Optional.empty()
+    assert Option.of('foo')
+    assert not Option.empty()
 
 
 def test_equals():
-    assert Optional.of('foo') == Optional.of('foo')
-    assert Optional.of('foo') != Optional.of('bar')
-    assert Optional.of('foo') != Optional.empty()
-    assert Optional.empty() == Optional.empty()
-    assert Optional.of('foo') != 'foo'
+    assert Option.of('foo') == Option.of('foo')
+    assert Option.of('foo') != Option.of('bar')
+    assert Option.of('foo') != Option.empty()
+    assert Option.empty() == Option.empty()
+    assert Option.of('foo') != 'foo'
 
 
 def test_hash():
-    assert hash(Optional.of('foo')) == hash(Optional.of('foo'))
-    assert hash(Optional.of('foo')) == hash('foo')
-    assert hash(Optional.empty()) == hash(None)
+    assert hash(Option.of('foo')) == hash(Option.of('foo'))
+    assert hash(Option.of('foo')) == hash('foo')
+    assert hash(Option.empty()) == hash(None)
 
 
 def test_repl():
-    assert repr(Optional.of('foo')) == "Optional('foo')"
-    assert repr(Optional.empty()) == 'Optional(None)'
+    assert repr(Option.of('foo')) == "Option('foo')"
+    assert repr(Option.empty()) == 'Option(None)'

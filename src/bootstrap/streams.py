@@ -23,7 +23,7 @@ from typing import (
 )
 
 from .objects import require_not_none, identity
-from .optional import Optional
+from .option import Option
 
 __all__ = [
     'Stream'
@@ -531,13 +531,13 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         """
 
     @overload
-    def reduce(self: Stream[T], accumulator: Callable[[T, T], T]) -> Optional[T]: ...
+    def reduce(self: Stream[T], accumulator: Callable[[T, T], T]) -> Option[T]: ...
 
     @overload
     def reduce(self: Stream[T], accumulator: Callable[[T, T], T], initial: T) -> T: ...
 
     @abstractmethod
-    def reduce(self: Stream[T], accumulator: Callable[[T, T], T], initial: T = _not_defined) -> Union[T, Optional[T]]:
+    def reduce(self: Stream[T], accumulator: Callable[[T, T], T], initial: T = _not_defined) -> Union[T, Option[T]]:
         """
         Performs a reduction on the elements of this Stream, using an associative accumulation function,
         and returns the reduced value, if any.
@@ -550,69 +550,69 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         >>> stream = Stream.of(1, 2, 3)
         >>> result = stream.reduce(lambda a, x: a + x)
         >>> print(result)
-        ... Optional(6)
+        ... Option(6)
 
         >>> stream = Stream.of(1, 2, 3)
         >>> result = stream.reduce(lambda a, x: a + x, 10)
         >>> print(result)
-        ... Optional(16)
+        ... Option(16)
 
         >>> stream = Stream.empty()
         >>> result = stream.reduce(lambda a, x: a + x)
         >>> print(result)
-        ... Optional(None)
+        ... Option(None)
         """
 
     @overload
-    def min(self: Stream[T]) -> Optional[T]: ...
+    def min(self: Stream[T]) -> Option[T]: ...
 
     @overload
-    def min(self: Stream[T], comparator: Callable[[T], V]) -> Optional[T]: ...
+    def min(self: Stream[T], comparator: Callable[[T], V]) -> Option[T]: ...
 
     @abstractmethod
-    def min(self: Stream[T], comparator: Callable[[T], V] = identity) -> Optional[T]:
+    def min(self: Stream[T], comparator: Callable[[T], V] = identity) -> Option[T]:
         """
         Returns the minimum element of this stream according to the provided Comparator.
         This is a terminal operation.
 
         :param comparator: a non-interfering, stateless comparator to compare elements of this stream
-        :return: an Optional describing the minimum element of this stream
+        :return: an Option describing the minimum element of this stream
 
         >>> stream = Stream.of(3, 1, 2)
         >>> result = stream.min()
         >>> print(result)
-        ... Optional(1)
+        ... Option(1)
 
         >>> stream = Stream.of('aaa', 'c', 'bb')
         >>> result = stream.min(len)
         >>> print(result)
-        ... Optional('c')
+        ... Option('c')
         """
 
     @overload
-    def max(self: Stream[T]) -> Optional[T]: ...
+    def max(self: Stream[T]) -> Option[T]: ...
 
     @overload
-    def max(self: Stream[T], comparator: Callable[[T], V]) -> Optional[T]: ...
+    def max(self: Stream[T], comparator: Callable[[T], V]) -> Option[T]: ...
 
     @abstractmethod
-    def max(self: Stream[T], comparator: Callable[[T], V] = identity) -> Optional[T]:
+    def max(self: Stream[T], comparator: Callable[[T], V] = identity) -> Option[T]:
         """
         Returns the maximum element of this stream according to the provided Comparator.
         This is a terminal operation.
 
         :param comparator: a non-interfering, stateless comparator to compare elements of this stream
-        :return: an Optional describing the maximum element of this stream
+        :return: an Option describing the maximum element of this stream
 
         >>> stream = Stream.of(2, 1, 3)
         >>> result = stream.min()
         >>> print(result)
-        ... Optional(3)
+        ... Option(3)
 
         >>> stream = Stream.of('aaa', 'c', 'bb')
         >>> result = stream.min(len)
         >>> print(result)
-        ... Optional('aaa')
+        ... Option('aaa')
         """
 
     @abstractmethod
@@ -710,17 +710,17 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         """
 
     @abstractmethod
-    def find_first(self: Stream[T]) -> Optional[T]:
+    def find_first(self: Stream[T]) -> Option[T]:
         """
-        Returns an Optional describing the first element of this stream, or an empty Optional if the stream is empty.
+        Returns an Option describing the first element of this stream, or an empty Option if the stream is empty.
         This is a terminal operation.
 
-        :return: an Optional describing the first element of this stream, or an empty Optional if the stream is empty
+        :return: an Option describing the first element of this stream, or an empty Option if the stream is empty
 
         >>> stream = Stream.of(2, 3, 4)
         >>> result = stream.find_first()
         >>> print(result)
-        ... Optional(2)
+        ... Option(2)
         """
 
     @abstractmethod
@@ -924,7 +924,7 @@ class _PipelineStage:
     """
 
     def __init__(self, parent: _PipelineStage, materialized=False) -> None:
-        self.__parent = Optional.of_nullable(parent)
+        self.__parent = Option.of_nullable(parent)
         self.__materialized = materialized
         self.__consuming_state = self.__parent \
             .map(_PipelineStage.__is_consumed) \
@@ -1042,13 +1042,13 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
     def to_dict(self: Stream[Tuple[K, V]]) -> Dict[K, V]:
         return self.collect(dict)  # noqa
 
-    def reduce(self, accumulator: Callable[[T, T], T], initial: T = _not_defined) -> Union[T, Optional[T]]:
+    def reduce(self, accumulator: Callable[[T, T], T], initial: T = _not_defined) -> Union[T, Option[T]]:
         return self.__reduce(require_not_none(accumulator), initial, self)
 
-    def min(self, comparator: Callable[[T], V] = identity) -> Optional[T]:
+    def min(self, comparator: Callable[[T], V] = identity) -> Option[T]:
         return self.__minmax(min, require_not_none(comparator), self)
 
-    def max(self, comparator: Callable[[T], V] = identity) -> Optional[T]:
+    def max(self, comparator: Callable[[T], V] = identity) -> Option[T]:
         return self.__minmax(max, require_not_none(comparator), self)
 
     def count(self) -> int:
@@ -1064,7 +1064,7 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
         require_not_none(predicate)
         return self.all_match(lambda item: not predicate(item))
 
-    def find_first(self) -> Optional[T]:
+    def find_first(self) -> Option[T]:
         return self.__find_first(self)
 
     def key_by(self: Stream[T], mapper: Callable[[T], K]) -> Stream[Tuple[K, T]]:
@@ -1199,23 +1199,23 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
         if initial != _not_defined:
             return reduce(initial)
         try:
-            return Optional.of_nullable(reduce())
+            return Option.of_nullable(reduce())
         except TypeError:
-            return Optional.empty()
+            return Option.empty()
 
     @staticmethod
     def __minmax(func, comparator: Callable[[T], V], iterable: Iterable[T]):
         try:
-            return Optional.of_nullable(func(iterable, key=comparator))
+            return Option.of_nullable(func(iterable, key=comparator))
         except ValueError:
-            return Optional.empty()
+            return Option.empty()
 
     @staticmethod
     def __find_first(iterable: Iterable[T]):
         try:
-            return Optional.of_nullable(next(iter(iterable)))
+            return Option.of_nullable(next(iter(iterable)))
         except StopIteration:
-            return Optional.empty()
+            return Option.empty()
 
     def __group_by_key(self, downstream: Callable[[V], T]):
         def func(stream: Stream[Tuple[K, V]]):

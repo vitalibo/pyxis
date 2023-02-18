@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from bootstrap import Stream, identity, Optional
+from bootstrap import Stream, identity, Option
 
 
 # pylint: disable=too-many-lines
@@ -852,7 +852,7 @@ def test_reduce():
 
     actual = stream.reduce(lambda a, x: a + x)
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 6
 
@@ -862,7 +862,7 @@ def test_reduce_empty():
 
     actual = stream.reduce(lambda a, x: a + x)
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_empty()
 
 
@@ -871,7 +871,7 @@ def test_reduce_initial():
 
     actual = stream.reduce(lambda a, x: a + x, 10)
 
-    assert not isinstance(actual, Optional)
+    assert not isinstance(actual, Option)
     assert actual == 16
 
 
@@ -880,7 +880,7 @@ def test_reduce_initial_empty():
 
     actual = stream.reduce(lambda a, x: a + x, 10)
 
-    assert not isinstance(actual, Optional)
+    assert not isinstance(actual, Option)
     assert actual == 10
 
 
@@ -893,7 +893,7 @@ def test_reduce_lazy():
 
     actual = stream.reduce(mock_accumulator)
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 20
     assert len(mock_iterable.mock_calls) == 4
@@ -907,7 +907,7 @@ def test_min():
 
     actual = stream.min()
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 1
 
@@ -917,7 +917,7 @@ def test_min_empty():
 
     actual = stream.min()
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_empty()
 
 
@@ -926,7 +926,7 @@ def test_min_comparator():
 
     actual = stream.min(len)
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 'c'
 
@@ -940,7 +940,7 @@ def test_min_lazy():
 
     actual = stream.min(mock_comparator)
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 2
     assert len(mock_iterable.mock_calls) == 4
@@ -953,7 +953,7 @@ def test_max():
 
     actual = stream.max()
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 3
 
@@ -963,7 +963,7 @@ def test_max_empty():
 
     actual = stream.max()
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_empty()
 
 
@@ -973,7 +973,7 @@ def test_max_comparator():
 
     actual = stream.max(len)
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 'aaa'
 
@@ -987,7 +987,7 @@ def test_max_lazy():
 
     actual = stream.max(mock_comparator)
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 1
     assert len(mock_iterable.mock_calls) == 4
@@ -1197,7 +1197,7 @@ def test_find_first():
 
     actual = stream.find_first()
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 2
 
@@ -1207,7 +1207,7 @@ def test_find_first_empty():
 
     actual = stream.find_first()
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_empty()
 
 
@@ -1218,7 +1218,7 @@ def test_find_first_lazy():
 
     actual = stream.find_first()
 
-    assert isinstance(actual, Optional)
+    assert isinstance(actual, Option)
     assert actual.is_present()
     assert actual.get() == 1
     assert len(mock_iterable.mock_calls) == 1
