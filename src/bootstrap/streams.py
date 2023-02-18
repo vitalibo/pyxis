@@ -37,6 +37,7 @@ V = TypeVar('V')
 _not_defined = object()
 
 
+# pylint: disable=too-many-lines
 class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
     """
     A sequence of elements supporting sequential and parallel operations.
@@ -65,6 +66,14 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param iterable: an Iterable object describing the stream elements
         :param args: the elements of the new stream
         :return: a new sequential Stream
+
+        >>> stream = Stream.of('abc')
+        >>> print(list(stream))
+        ... ['a', 'b', 'c']
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> print(list(stream))
+        ... [1, 2, 3]
         """
 
         return _SequentialStream.of(*args)
@@ -75,6 +84,10 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         Returns an empty sequential Stream.
 
         :return: a empty sequential Stream
+
+        >>> stream = Stream.empty()
+        >>> print(list(stream))
+        ... []
         """
 
         return Stream.of(())
@@ -86,6 +99,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param supplier: the Supplier of generated elements
         :return: a new infinite sequential unordered Stream
+
+        >>> stream = Stream.generate(uuid.uuid4)
+        >>> stream = stream.limit(2)
+        >>> print(list(stream))
+        ... [uuid.UUID('d5186bcb-a554-4031-9a08-37e285c2bc2c'), uuid.UUID('e0c7938c-d534-40ac-939e-be15913dc93c')]
         """
 
         return _SequentialStream.generate(supplier)
@@ -111,6 +129,18 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param stop: position to stop
         :param step: step of incrementation (default 1)
         :return: a new int sequential Stream
+
+        >>> stream = Stream.range(3)
+        >>> print(list(stream))
+        ... [0, 1, 2]
+
+        >>> stream = Stream.range(3, 6)
+        >>> print(list(stream))
+        ... [3, 4, 5]
+
+        >>> stream = Stream.range(0, 6, 2)
+        >>> print(list(stream))
+        ... [0, 2, 4]
         """
 
         return Stream.of(range(*args))
@@ -122,6 +152,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param predicate: stateless function to apply to each element to determine if it should be included
         :return: the new Stream
+
+        >>> stream = Stream.range(10)
+        >>> stream = stream.filter(lambda x: x % 2 == 0)
+        >>> print(list(stream))
+        ... [0, 2, 4, 6, 8]
         """
 
     @abstractmethod
@@ -131,6 +166,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param mapper: stateless function to apply to each element
         :return: the new Stream
+
+        >>> stream = Stream.of('abc')
+        >>> stream = stream.map(str.upper)
+        >>> print(list(stream))
+        ... ['A', 'B', 'C']
         """
 
     @abstractmethod
@@ -141,6 +181,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param mapper: stateless function to apply to each element which produces of new values
         :return: the new Stream
+
+        >>> stream = Stream.of('abc')
+        >>> stream = stream.flat_map(lambda x: (x, x.upper()))
+        >>> print(list(stream))
+        ... ['a', 'A', 'b', 'B', 'c', 'C']
         """
 
     @overload
@@ -156,6 +201,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param comparator: stateless function to apply to each element which serves as a basis for comparison.
         :return: the new Stream
+
+        >>> stream = Stream.of('abacbc')
+        >>> stream = stream.distinct()
+        >>> print(list(stream))
+        ... ['a', 'b', 'c']
         """
 
     @overload
@@ -179,6 +229,21 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param comparator: stateless function to apply to each element which serves as a basis for comparison
         :param reverse: If True, then a stream would be sorted in reverse (descending) order
         :return: the new Stream
+
+        >>> stream = Stream.of('bca')
+        >>> stream = stream.sorted()
+        >>> print(list(stream))
+        ... ['a', 'b', 'c']
+
+        >>> stream = Stream.of('bca')
+        >>> stream = stream.sorted(reverse=True)
+        >>> print(list(stream))
+        ... ['c', 'b', 'a']
+
+        >>> stream = Stream.of('aaa', 'b', 'cc')
+        >>> stream = stream.sorted(len)
+        >>> print(list(stream))
+        ... ['b', 'cc', 'aaa']
         """
 
     @abstractmethod
@@ -187,6 +252,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         Return a reverse Stream over the values of the given Stream.
 
         :return: the new Stream
+
+        >>> stream = Stream.of(1, 3, 2)
+        >>> stream = stream.reversed()
+        >>> print(list(stream))
+        ... [2, 3, 1]
         """
 
     @abstractmethod
@@ -197,6 +267,13 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param consumer: a non-interfering action to perform on the elements as they are consumed from the stream
         :return: the new Stream
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> stream = stream.peek(print)
+        >>> list(stream)
+        ... 1
+        ... 2
+        ... 3
         """
 
     @abstractmethod
@@ -205,6 +282,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         Returns a pair Stream consisting of the elements of this Stream with their natural index
 
         :return: the new Stream
+
+        >>> stream = Stream.of('abc')
+        >>> stream = stream.enumerate()
+        >>> print(list(stream))
+        ... [(0, 'a'), (1, 'b'), (2, 'c')]
         """
 
     @abstractmethod
@@ -214,6 +296,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param other: second input Stream to zip
         :return: the new pair Stream
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> stream = stream.zip(Stream.of('abcd'))
+        >>> print(list(stream))
+        ... [(1, 'a'), (2, 'b'), (3, 'c'), (None, 'd')]
         """
 
     @abstractmethod
@@ -223,6 +310,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param n: width of the window
         :return: the new Stream
+
+        >>> stream = Stream.of('abcdefg')
+        >>> stream = stream.window(3)
+        >>> print(list(stream))
+        ... [('a', 'b', 'c'), ('d', 'e', 'f'), ('g',)]
         """
 
     @abstractmethod
@@ -232,6 +324,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param n: width of the window
         :return: the new Stream
+
+        >>> stream = Stream.of('abcde')
+        >>> stream = stream.sliding_window(3)
+        >>> print(list(stream))
+        ... [('a', 'b', 'c'), ('b', 'c', 'd'), ('c', 'd', 'e')]
         """
 
     @abstractmethod
@@ -241,6 +338,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param max_size: the number of elements the stream should be limited to
         :return: the new Stream
+
+        >>> stream = Stream.of(1, 2, 3, 4, 5)
+        >>> stream = stream.limit(3)
+        >>> print(list(stream))
+        ... [1, 2, 3]
         """
 
     @abstractmethod
@@ -251,6 +353,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param n: the number of leading elements to skip
         :return: the new Stream
+
+        >>> stream = Stream.of(1, 2, 3, 4, 5)
+        >>> stream = stream.skip(3)
+        >>> print(list(stream))
+        ... [4, 5]
         """
 
     @abstractmethod
@@ -262,6 +369,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param predicate: a non-interfering, stateless predicate to apply to elements to determine the longest
         prefix of elements.
         :return: the new Stream
+
+        >>> stream = Stream.of(1, 2, 3, 2, 1)
+        >>> stream = stream.take_while(lambda x: x < 3)
+        >>> print(list(stream))
+        ... [1, 2]
         """
 
     @abstractmethod
@@ -273,6 +385,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param predicate: a non-interfering, stateless predicate to apply to elements to determine the longest
         prefix of elements.
         :return: the new Stream
+
+        >>> stream = Stream.of(1, 2, 3, 2, 1)
+        >>> stream = stream.drop_while(lambda x: x < 3)
+        >>> print(list(stream))
+        ... [3, 2, 1]
         """
 
     @abstractmethod
@@ -283,6 +400,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param other: second input stream to concatenate
         :return: new the concatenation of the two streams
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> stream = stream.union(Stream.of('abc'))
+        >>> print(list(stream))
+        ... [1, 2, 3, 'a', 'b', 'c']
         """
 
     @abstractmethod
@@ -292,6 +414,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param transform: a function that takes and returns a Stream
         :return: a new Stream
+
+        >>> stream = Stream.of('abc')
+        >>> stream = stream.transform(lambda x: x.map(str.upper))
+        >>> print(list(stream))
+        ... ['A', 'B', 'C']
         """
 
     @abstractmethod
@@ -301,6 +428,13 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         This is a terminal operation.
 
         :return: a new Stream
+
+        >>> stream = Stream.of('abc')
+        >>> stream = stream.materialize()
+        >>> print(list(stream))
+        ... ['a', 'b', 'c']
+        >>> print(list(stream))
+        ... ['a', 'b', 'c']
         """
 
     @abstractmethod
@@ -310,6 +444,12 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         This is a terminal operation.
 
         :param consumer: a non-interfering action to perform on the elements
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> stream.for_each(print)
+        ... 1
+        ... 2
+        ... 3
         """
 
     @abstractmethod
@@ -321,6 +461,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param collector: a function that creates a new mutable result container.
         :return: the result of the collector function
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> lst = stream.collect(list)
+        >>> print(lst)
+        ... [1, 2, 3]
         """
 
     @abstractmethod
@@ -330,6 +475,17 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         This is a terminal operation.
 
         :return: an iterator containing the Stream elements
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> itr = stream.iterator()
+        >>> print(next(itr))
+        ... 1
+        >>> print(next(itr))
+        ... 2
+        >>> print(next(itr))
+        ... 3
+        >>> print(next(itr))
+        ... StopIteration
         """
 
     @abstractmethod
@@ -339,6 +495,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         This is a terminal operation.
 
         :return: a list containing the stream elements
+
+        >>> stream = Stream.of('abc')
+        >>> lst = stream.to_list()
+        >>> print(lst)
+        ... ['a', 'b', 'c']
         """
 
     @abstractmethod
@@ -348,6 +509,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         This is a terminal operation.
 
         :return: a set containing the stream elements
+
+        >>> stream = Stream.of('abcabc')
+        >>> st = stream.to_set()
+        >>> print(st)
+        ... {'a', 'b', 'c'}
         """
 
     @abstractmethod
@@ -357,6 +523,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         This is a terminal operation.
 
         :return: a dict containing the stream elements
+
+        >>> stream = Stream.of(('a', 1), ('b', 2), ('c', 3))
+        >>> dct = stream.to_dict()
+        >>> print(dct)
+        ... {'a': 1, 'b': 2, 'c': 3}
         """
 
     @overload
@@ -375,6 +546,21 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param accumulator: an associative, non-interfering, stateless function for combining two values
         :param initial: if present, it is placed before the items of the sequence in the calculation
         :return: the result of the reduction
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> result = stream.reduce(lambda a, x: a + x)
+        >>> print(result)
+        ... Optional(6)
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> result = stream.reduce(lambda a, x: a + x, 10)
+        >>> print(result)
+        ... Optional(16)
+
+        >>> stream = Stream.empty()
+        >>> result = stream.reduce(lambda a, x: a + x)
+        >>> print(result)
+        ... Optional(None)
         """
 
     @overload
@@ -391,6 +577,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param comparator: a non-interfering, stateless comparator to compare elements of this stream
         :return: an Optional describing the minimum element of this stream
+
+        >>> stream = Stream.of(3, 1, 2)
+        >>> result = stream.min()
+        >>> print(result)
+        ... Optional(1)
+
+        >>> stream = Stream.of('aaa', 'c', 'bb')
+        >>> result = stream.min(len)
+        >>> print(result)
+        ... Optional('c')
         """
 
     @overload
@@ -407,6 +603,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param comparator: a non-interfering, stateless comparator to compare elements of this stream
         :return: an Optional describing the maximum element of this stream
+
+        >>> stream = Stream.of(2, 1, 3)
+        >>> result = stream.min()
+        >>> print(result)
+        ... Optional(3)
+
+        >>> stream = Stream.of('aaa', 'c', 'bb')
+        >>> result = stream.min(len)
+        >>> print(result)
+        ... Optional('aaa')
         """
 
     @abstractmethod
@@ -416,6 +622,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         This is a terminal operation.
 
         :return: the count of elements in this Stream
+
+        >>> stream = Stream.of(0, 2, 4)
+        >>> result = stream.count()
+        >>> print(result)
+        ... 3
         """
 
     @overload
@@ -432,6 +643,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param predicate: a non-interfering, stateless predicate to apply to elements of this stream
         :return: True if any elements of the stream match the provided predicate, otherwise False
+
+        >>> stream = Stream.of('a', '1', 'b')
+        >>> result = stream.any_match(str.isnumeric)
+        >>> print(result)
+        ... True
+
+        >>> stream = Stream.of('a', 'b', 'c')
+        >>> result = stream.any_match(str.isnumeric)
+        >>> print(result)
+        ... False
         """
 
     @overload
@@ -449,6 +670,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param predicate: a non-interfering, stateless predicate to apply to elements of this stream
         :return: True if either all elements of the stream match the provided predicate or the stream is empty,
         otherwise False
+
+        >>> stream = Stream.of('1', '2', '3')
+        >>> result = stream.all_match(str.isnumeric)
+        >>> print(result)
+        ... True
+
+        >>> stream = Stream.of('1', '2', 'c')
+        >>> result = stream.all_match(str.isnumeric)
+        >>> print(result)
+        ... False
         """
 
     @overload
@@ -466,6 +697,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param predicate: a non-interfering, stateless predicate to apply to elements of this stream
         :return: True if either no elements of the stream match the provided predicate or the stream is empty,
         otherwise False
+
+        >>> stream = Stream.of('1', '2', '3')
+        >>> result = stream.none_match(str.isalpha)
+        >>> print(result)
+        ... True
+
+        >>> stream = Stream.of('a', '2', '3')
+        >>> result = stream.none_match(str.isalpha)
+        >>> print(result)
+        ... False
         """
 
     @abstractmethod
@@ -475,6 +716,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         This is a terminal operation.
 
         :return: an Optional describing the first element of this stream, or an empty Optional if the stream is empty
+
+        >>> stream = Stream.of(2, 3, 4)
+        >>> result = stream.find_first()
+        >>> print(result)
+        ... Optional(2)
         """
 
     @abstractmethod
@@ -484,6 +730,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param mapper: stateless function to apply to each element and result used as key
         :return: the new pair Stream
+
+        >>> stream = Stream.of('abc')
+        >>> stream = stream.key_by(ord)
+        >>> print(list(stream))
+        ... [(97, 'a'), (98, 'b'), (99, 'c')]
         """
 
     @abstractmethod
@@ -492,6 +743,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         Returns a new Stream consisting keys of this Stream.
 
         :return: the new Stream
+
+        >>> stream = Stream.of(('a', 1), ('b', 2), ('c', 3))
+        >>> stream = stream.keys()
+        >>> print(list(stream))
+        ... ['a', 'b', 'c']
         """
 
     def values(self: Stream[Tuple[K, V]]) -> Stream[V]:
@@ -499,6 +755,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         Returns a new Stream consisting values of this Stream.
 
         :return: the new Stream
+
+        >>> stream = Stream.of(('a', 1), ('b', 2), ('c', 3))
+        >>> stream = stream.values()
+        >>> print(list(stream))
+        ... [1, 2, 3]
         """
 
     @abstractmethod
@@ -508,6 +769,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param mapper: stateless function to apply to each element value
         :return: the new Stream
+
+        >>> stream = Stream.of((1, 'a'), (2, 'b'), (3, 'c'))
+        >>> stream.map_values(str.upper)
+        >>> print(list(stream))
+        ... [(1, 'A'), (2, 'B'), (3, 'C')]
         """
 
     @abstractmethod
@@ -518,6 +784,11 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param mapper: stateless function to apply to each element value which produces of new values
         :return: the new Stream
+
+        >>> stream = Stream.of((1, 'a'), (2, 'bc'))
+        >>> stream = stream.flat_map_values(lambda x: x)
+        >>> print(list(stream))
+        ... [(1, 'a'), (2, 'b'), (2, 'c')]
         """
 
     @overload
@@ -540,6 +811,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param classifier: a classifier function mapping input elements to keys
         :param downstream: stateless function to apply to each downstream element
         :return: the new pair Stream
+
+        >>> stream = Stream.of('aa', 'ccc', 'bb')
+        >>> stream = stream.group_by(len)
+        >>> print(list(stream))
+        >>> [(2, ('aa', 'bb')), (3, ('ccc',))]
+
+        >>> stream = Stream.of('aa', 'ccc', 'bb')
+        >>> stream = stream.group_by(len, downstream=str.upper)
+        >>> print(list(stream))
+        >>> [(2, ('AA', 'BB')), (3, ('CCC',))]
         """
 
     @overload
@@ -559,6 +840,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
         :param downstream: stateless function to apply to each downstream element
         :return: the new pair Stream
+
+        >>> stream = Stream.of((1, 'a'), (2, 'b'), (2, 'c'), (1, 'd'))
+        >>> stream = stream.group_by_key()
+        >>> print(list(stream))
+        ... [(1, ('a', 'd')), (2, ('b', 'c'))]
+
+        >>> stream = Stream.of((1, 'a'), (2, 'b'), (2, 'c'), (1, 'd'))
+        >>> stream = stream.group_by_key(str.upper)
+        >>> print(list(stream))
+        ... [(1, ('A', 'D')), (2, ('B', 'C'))]
         """
 
     @overload
@@ -579,6 +870,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param accumulator: a stateless function used to reduce the input elements
         :param initial: the identity value for the reduction
         :return: the new pair Stream
+
+        >>> stream = Stream.of(('a', 1), ('b', 2), ('a', 3))
+        >>> stream = stream.reduce_by_key(lambda x, y: x + y)
+        >>> print(list(stream))
+        ... [('a', 4), ('b', 2)]
+
+        >>> stream = Stream.of(('a', 1), ('b', 2), ('a', 3))
+        >>> stream = stream.reduce_by_key(lambda x, y: x + y, 10)
+        >>> print(list(stream))
+        ... [('a', 14), ('b', 12)]
         """
 
     @overload
@@ -601,6 +902,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         :param prefix: the sequence of characters to be used at the beginning of the joined result
         :param suffix: the sequence of characters to be used at the end of the joined result
         :return: concatenated sting
+
+        >>> stream = Stream.of('a', 'b', 'c')
+        >>> result = stream.joining()
+        >>> print(result)
+        ... 'abc'
+
+        >>> stream = Stream.of(1, 2, 3)
+        >>> result = stream.joining(', ', '[', ']')
+        >>> print(result)
+        ... '[1, 2, 3]'
         """
 
     @abstractmethod
