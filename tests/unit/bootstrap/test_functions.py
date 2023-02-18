@@ -1,3 +1,6 @@
+import dataclasses
+from typing import Optional
+
 import pytest
 
 from bootstrap import functions
@@ -55,6 +58,24 @@ def test_not_none_true():
     actual = functions.not_none('foo')
 
     assert actual
+
+
+def test_field_ref():
+    @functions.field_ref
+    @dataclasses.dataclass
+    class User:
+        """ User """
+
+        name: str
+        age: int
+        address: Optional[str]
+
+    user = User('foo', 12, None)
+
+    assert User.name is not None
+    assert User.name(user) == 'foo'
+    assert User.age(user) == 12
+    assert User.address(user) is None
 
 
 def test_identity():

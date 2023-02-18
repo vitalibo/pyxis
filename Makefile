@@ -7,7 +7,7 @@ help: ## show this help
 	@sed -ne '/@sed/!s/## //p' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":"}; {printf "\033[36m  %-15s\033[0m %s\n", $$1, $$2}'
 
 init: ## install required packages
-	$(PYTHON) -m pip install -r requirements.txt -r requirements-dev.txt
+	$(PYTHON) -m pip install -r requirements-dev.txt
 
 checkstyle: ## run static code analyser
 	$(PYTHON) -m pylint ./src/* ./tests/* --rcfile=.pylintrc
