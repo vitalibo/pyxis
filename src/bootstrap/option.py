@@ -8,7 +8,7 @@ __all__ = [
     'Option'
 ]
 
-from .objects import require_not_none
+from .functions import require_not_none
 
 T = TypeVar('T')
 U = TypeVar('U')

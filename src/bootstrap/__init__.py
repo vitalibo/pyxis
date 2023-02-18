@@ -1,6 +1,6 @@
 # pylint: disable=unused-import
 
-from .objects import (
+from .functions import (
     require_not_none,
     is_none,
     not_none,

@@ -22,7 +22,7 @@ from typing import (
     overload
 )
 
-from .objects import require_not_none, identity
+from .functions import require_not_none, identity
 from .option import Option
 
 __all__ = [
