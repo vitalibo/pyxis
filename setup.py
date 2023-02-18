@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="python-bootstrap",
+    name="pyboost",
     version="1.0.0",
     python_requires=">=3.7",
-    packages=find_packages(where='./src/', include=['*']),
+    packages=find_packages(where="./src/", include=["*"]),
     package_dir={"": "src"},
     zip_safe=False,
     install_requires=[],

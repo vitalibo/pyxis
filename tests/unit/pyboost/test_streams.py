@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from bootstrap import Stream, identity, Option
+from pyboost import Stream, identity, Option
 
 
 # pylint: disable=too-many-lines

@@ -3,7 +3,7 @@ from typing import Optional
 
 import pytest
 
-from bootstrap import functions
+from pyboost import functions
 
 
 def test_require_not_none():
