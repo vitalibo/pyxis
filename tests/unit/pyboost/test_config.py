@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from pyboost.config import Config, ConfigException, ConfigFactory, LocalFileConfigReader, JsonConfigParser, \
-    IniConfigParser, ConfigParser, ConfigReader
+    IniConfigParser, ConfigParser, ConfigReader, YamlConfigParser
 
 
 def test_config_get():
@@ -566,8 +566,8 @@ def test_config_factory_file_not_found():
 
 def test_config_factory_unsupported_file_type():
     with mock.patch('builtins.open', mock.mock_open(read_data='foo: bar')) as mock_file:
-        with pytest.raises(ConfigException, match='no format parser found for file config.yaml'):
-            ConfigFactory.from_file('config.yaml')
+        with pytest.raises(ConfigException, match='no format parser found for file config.conf'):
+            ConfigFactory.from_file('config.conf')
 
         mock_file.assert_not_called()
 
@@ -598,7 +598,7 @@ def test_config_factory_default_load_not_found():
 
         assert actual == Config({'foo': 'bar'})
         mock_load.assert_has_calls([
-            mock.call('application.json'), mock.call('application.ini'), mock.call('application.properties')
+            mock.call('application.json'), mock.call('application.yaml'), mock.call('application.ini')
         ])
 
 
@@ -614,8 +614,8 @@ def test_config_factory_default_load_use_arguments():
 
         assert actual == Config({'foo': 'bar'})
         mock_load.assert_has_calls([
-            mock.call('application.json'), mock.call('application.ini'), mock.call('application.properties'),
-            mock.call('application.yaml'), mock.call('s3://bucket/config.json')
+            mock.call('application.json'), mock.call('application.yaml'), mock.call('application.ini'),
+            mock.call('application.properties'), mock.call('s3://bucket/config.json')
         ])
 
 
@@ -668,6 +668,20 @@ def test_ini_config_parser_test():
     assert IniConfigParser.test('foo.yaml') is False
 
 
+def test_yaml_config_parser():
+    parser = YamlConfigParser()
+
+    actual = parser.parse('foo: bar')
+
+    assert actual == {'foo': 'bar'}
+
+
+def test_yaml_config_parser_test():
+    assert YamlConfigParser.test('foo.yaml') is True
+    assert YamlConfigParser.test('s3://bucket/foo.yaml') is True
+    assert YamlConfigParser.test('foo.json') is False
+
+
 def test_config_parser_find_subclass_json():
     actual = ConfigParser.find_subclass('foo.json')
 
@@ -682,7 +696,14 @@ def test_config_parser_find_subclass_ini():
     assert isinstance(actual.get(), IniConfigParser)
 
 
-def test_config_parser_find_subclass_unknown():
+def test_config_parser_find_subclass_yaml():
     actual = ConfigParser.find_subclass('foo.yaml')
+
+    assert actual.is_present()
+    assert isinstance(actual.get(), YamlConfigParser)
+
+
+def test_config_parser_find_subclass_unknown():
+    actual = ConfigParser.find_subclass('foo.hocon')
 
     assert actual.is_empty()

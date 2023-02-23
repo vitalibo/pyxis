@@ -172,7 +172,7 @@ class ConfigFactory:
         Loads default application configuration
         """
 
-        for extension in ['json', 'ini', 'properties', 'yaml']:
+        for extension in ['json', 'yaml', 'ini', 'properties']:
             try:
                 return ConfigFactory.load(f'application.{extension}')
             except (ConfigException, FileNotFoundError):
@@ -378,11 +378,24 @@ class IniConfigParser(ConfigParser):
         return config
 
 
+class YamlConfigParser(ConfigParser):
+    """
+    A configuration parser that uses YAML.
+    """
+
+    test = function(lambda x: x.endswith('.yaml') or x.endswith('.yml'))
+
+    def parse(self, content: str) -> dict:
+        import yaml  # pylint: disable=import-outside-toplevel
+        return yaml.safe_load(content)
+
+
 class ConfigValueReferenceResolver(ConfigValueResolver):
     """
     Resolves references to other values within the Config using the syntax `${key.subkey}`
     """
 
+    priority = 10
     test = function(lambda x: '${' in x and '}' in x and x.index('${') < x.index('}'))
 
     def resolve(self, config: Config, key: str, value: str) -> Any:
