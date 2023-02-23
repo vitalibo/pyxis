@@ -367,6 +367,13 @@ def test_or_else_raise_custom_error():
         obj.or_else_raise(KeyError)
 
 
+def test_or_else_raise_custom_error_with_message():
+    obj = Option.empty()
+
+    with pytest.raises(KeyError, match='foo'):
+        obj.or_else_raise(KeyError, 'foo')
+
+
 def test_bool():
     assert Option.of('foo')
     assert not Option.empty()

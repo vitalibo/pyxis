@@ -3,10 +3,12 @@ __all__ = [
     'is_none',
     'not_none',
     'field_ref',
-    'identity'
+    'identity',
+    'function',
+    'SingletonMeta'
 ]
 
-from typing import Optional, TypeVar, overload
+from typing import Optional, TypeVar, overload, Callable
 
 T = TypeVar('T')
 
@@ -69,3 +71,26 @@ def identity(obj: T) -> T:
     """
 
     return obj
+
+
+def function(f: Callable) -> Callable:
+    """
+    A decorator that simply returns the input function, useful for creating higher-order functions.
+    """
+    return f
+
+
+class SingletonMeta(type):
+    """
+    A metaclass that can be used to create classes with only one instance.
+
+    >>> class MyClass(metaclass=SingletonMeta):
+    >>>    pass
+    """
+
+    __instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls.__instances:
+            cls.__instances[cls] = super().__call__(*args, **kwargs)
+        return cls.__instances[cls]

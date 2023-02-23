@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import (
-    Generic, TypeVar, Callable, overload
+    Generic, TypeVar, Callable, overload, Any
 )
 
 __all__ = [
@@ -218,10 +218,12 @@ class Option(Generic[T]):
         ...
 
     @overload
-    def or_else_raise(self, supplier: Callable[[], Exception]) -> T:
+    def or_else_raise(self, supplier: Callable[[Any], Exception], *args, **kwargs) -> T:
         ...
 
-    def or_else_raise(self, supplier: Callable[[], Exception] = None) -> T:
+    def or_else_raise(  # pylint: disable=keyword-arg-before-vararg
+            self, supplier: Callable[[Any], Exception] = None, *args, **kwargs
+    ) -> T:
         """
         If a value is present, returns the value, otherwise raises an exception produced by the exception
         supplying function.
@@ -235,7 +237,7 @@ class Option(Generic[T]):
 
         if supplier is None:
             raise ValueError('No value present')
-        raise supplier()
+        raise supplier(*args, **kwargs)
 
     def __bool__(self):
         return self.is_present()

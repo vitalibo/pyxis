@@ -84,3 +84,26 @@ def test_identity():
     actual = functions.identity(obj)
 
     assert hash(obj) == hash(actual)
+
+
+def test_one_instance_only():
+    class ClassA(metaclass=functions.SingletonMeta):
+        """ Used for testing only """
+
+    obj1 = ClassA()
+    obj2 = ClassA()
+
+    assert obj1 is obj2
+
+
+def test_multiple_classes():
+    class ClassA(metaclass=functions.SingletonMeta):
+        """ Used for testing only """
+
+    class ClassB(metaclass=functions.SingletonMeta):
+        """ Used for testing only """
+
+    obj1 = ClassA()
+    obj2 = ClassB()
+
+    assert obj1 is not obj2

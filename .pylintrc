@@ -24,7 +24,8 @@ disable =
     locally-disabled,
     file-ignored,
     no-else-return,
-    duplicate-code
+    duplicate-code,
+    fixme,
 
 [REFACTORING]
 max-nested-blocks = 3
