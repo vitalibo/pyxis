@@ -386,7 +386,7 @@ class ConfigValueReferenceResolver(ConfigValueResolver):
     test = function(lambda x: '${' in x and '}' in x and x.index('${') < x.index('}'))
 
     def resolve(self, config: Config, key: str, value: str) -> Any:
-        def func(string):
+        def parse(string):
             while string:
                 pos = string.find('$')
                 if pos < 0:
@@ -407,11 +407,28 @@ class ConfigValueReferenceResolver(ConfigValueResolver):
                         raise ConfigException(f'bad substitution variable reference {string}')
                     path = match.group(1)
                     string = string[match.end():]
+                    yield get(path)
 
-                    subst = config.get(path)
-                    yield self.resolve(config, key, subst) if isinstance(subst, str) else subst
+        def get(expr):
+            *paths, expr = expr.split('|')
+            for path in paths:
+                try:
+                    return config.get(path)
+                except ConfigException:
+                    pass
 
-        itr = iter(func(value))
+            path, *default = expr.split('?', 1)
+            try:
+                return config.get(path)
+            except ConfigException as e:
+                if not default:
+                    raise e
+                try:
+                    return ast.literal_eval(default[0])
+                except (ValueError, SyntaxError):
+                    return default[0]
+
+        itr = iter(parse(value))
         result = next(itr)
         for item in itr:
             if isinstance(item, (Dict, List)):

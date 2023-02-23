@@ -375,6 +375,42 @@ def samples_config_resolve():
         ), (
             {'exp': {'foo': '${foo}'}, 'foo': 123},
             {'exp': {'foo': 123}, 'foo': 123}
+        ), (
+            {'exp': '${foo?123}'},
+            {'exp': 123}
+        ), (
+            {'exp': '${foo?bar}'},
+            {'exp': 'bar'}
+        ), (
+            {'exp': '${foo?}'},
+            {'exp': ''}
+        ), (
+            {'exp': '${foo?bar}', 'bar': 123},
+            {'exp': 'bar', 'bar': 123}
+        ), (
+            {'exp': '${foo|bar}', 'foo': 123, 'bar': 456},
+            {'exp': 123, 'foo': 123, 'bar': 456}
+        ), (
+            {'exp': '${foo|bar}', 'bar': 123},
+            {'exp': 123, 'bar': 123}
+        ), (
+            {'exp': '${foo|bar|baz?True}'},
+            {'exp': True}
+        ), (
+            {'exp': '${foo|bar|baz?True}', 'bar': 123, 'baz': 456},
+            {'exp': 123, 'bar': 123, 'baz': 456}
+        ), (
+            {'exp': '${foo|bar|baz?True}', 'foo': [1, 2, 3]},
+            {'exp': [1, 2, 3], 'foo': [1, 2, 3]}
+        ), (
+            {'exp': '${foo.bar|baz.foo}', 'foo': {'bar': 123}, 'baz': {'foo': 456}},
+            {'exp': 123, 'foo': {'bar': 123}, 'baz': {'foo': 456}}
+        ), (
+            {'exp': '${foo.bar|baz.foo}', 'foo': {'baz': 123}, 'baz': {'foo': 456}},
+            {'exp': 456, 'foo': {'baz': 123}, 'baz': {'foo': 456}}
+        ), (
+            {'exp': '${foo[::-1]|baz.foo}', 'foo': [1, 2, 3]},
+            {'exp': [3, 2, 1], 'foo': [1, 2, 3]}
         )
     ]
 
@@ -386,6 +422,26 @@ def test_config_resolve(config, expected):
     actual = config.resolve()
 
     assert actual == Config(expected)
+
+
+def samples_config_resolve_with_missing():
+    return [
+        {'exp': '${foo}'},
+        {'exp': '${foo.bar}'},
+        {'exp': '${foo[0]}'},
+        {'exp': '${foo[0].bar}'},
+        {'exp': '${foo|bar}'},
+        {'exp': '${foo|bar|baz}'},
+        {'exp': '${foo[0]|bar[0]}'}
+    ]
+
+
+@pytest.mark.parametrize('config', samples_config_resolve_with_missing())
+def test_config_resolve_with_missing(config):
+    config = Config(config)
+
+    with pytest.raises(ConfigException):
+        config.resolve()
 
 
 def test_config_resolve_with_loop():
