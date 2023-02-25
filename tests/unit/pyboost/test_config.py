@@ -447,7 +447,7 @@ def test_config_resolve_with_missing(config):
 def test_config_resolve_with_loop():
     config = Config({'exp': '${foo}', 'foo': '${bar}', 'bar': '${foo}'})
 
-    with pytest.raises(RecursionError):
+    with pytest.raises(ConfigException):
         config.resolve()
 
 

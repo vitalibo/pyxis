@@ -113,9 +113,12 @@ class Config:
 
         def traversal(path, node):
             if isinstance(node, str):
-                return ConfigValueResolver.find_subclass(node) \
-                    .map(lambda x: traversal(path, x.resolve(self, path[1:], node))) \
-                    .or_else(node)
+                try:
+                    return ConfigValueResolver.find_subclass(node) \
+                        .map(lambda x: traversal(path, x.resolve(self, path[1:], node))) \
+                        .or_else(node)
+                except Exception as e:
+                    raise ConfigException(f'failed to resolve value for key "{path[1:]}": {e}') from e
             elif isinstance(node, dict):
                 return {key: traversal(f'{path}{key}', value) for key, value in node.items()}
             elif isinstance(node, list):
