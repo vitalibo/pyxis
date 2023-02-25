@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import (
-    Generic, TypeVar, Callable, overload, Any
+    Generic, TypeVar, Callable, Any, Optional, overload
 )
 
 __all__ = [
@@ -146,6 +146,33 @@ class Option(Generic[T]):
 
         return Option.of_nullable(mapper(self.__value))
 
+    @overload
+    def try_map(self, mapper: Callable[[T], U]) -> Option[U]:
+        ...
+
+    def try_map(self, mapper: Callable[[T], U], error_handler: Optional[Callable[[Exception], U]] = None) -> Option[U]:
+        """
+        If a value is present, returns an Option describing the result of applying the given mapping function
+        to the value, catching any exceptions that occur. If no value is present, returns an empty Option.
+
+        :param mapper: the function to apply to the value, if present
+        :param error_handler: an optional function to handle exceptions raised by the mapper
+        :return: an Option containing the result of applying the function to the value, or an empty Option if no value
+        is present or if an exception occurred
+        """
+
+        require_not_none(mapper)
+
+        if self.is_empty():
+            return self.empty()
+
+        try:
+            return Option.of_nullable(mapper(self.__value))
+        except Exception as e:  # pylint: disable=broad-except
+            if error_handler is not None:
+                return Option.of_nullable(error_handler(e))
+            return Option.empty()
+
     @staticmethod
     def of(value: T) -> Option[T]:
         """
@@ -170,6 +197,23 @@ class Option(Generic[T]):
             return Option.empty()
         else:
             return Option(value)
+
+    @staticmethod
+    def try_of(supplier: Callable[[], T]) -> Option[T]:
+        """
+        Returns an Option describing the result of invoking a specified supplier, if non-none, otherwise
+        returns an empty Option.
+
+        :param supplier: the function to invoke
+        :return: an Option with a present value if the specified function returns non-none, otherwise an empty Option
+        """
+
+        require_not_none(supplier)
+
+        try:
+            return Option.of_nullable(supplier())
+        except Exception:  # pylint: disable=broad-except
+            return Option.empty()
 
     def __or__(self, other: Option[T]) -> Option[T]:
         """

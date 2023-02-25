@@ -35,6 +35,23 @@ def test_of_nullable_none():
     assert actual == Option.empty()
 
 
+def test_try_of():
+    actual = Option.try_of(lambda: 'foo')
+
+    assert actual == Option.of('foo')
+
+
+def test_try_of_raise():
+    actual = Option.try_of(lambda: 1 / 0)
+
+    assert actual == Option.empty()
+
+
+def test_try_of_supplier_is_none():
+    with pytest.raises(ValueError):
+        Option.try_of(None)
+
+
 def test_get():
     obj = Option.of('foo')
 
@@ -260,6 +277,87 @@ def test_map_mapper_is_none():
 
     with pytest.raises(ValueError):
         obj.map(None)
+
+
+def test_try_map():
+    obj = Option.of('foo')
+    mock_mapper = mock.Mock()
+    mock_mapper.return_value = 'bar'
+
+    actual = obj.try_map(mock_mapper)
+
+    assert actual == Option.of('bar')
+    mock_mapper.assert_called_once_with('foo')
+
+
+def test_try_map_return_none():
+    obj = Option.of('foo')
+    mock_mapper = mock.Mock()
+    mock_mapper.return_value = None
+
+    actual = obj.try_map(mock_mapper)
+
+    assert actual == Option.empty()
+    mock_mapper.assert_called_once_with('foo')
+
+
+def test_try_map_raise_exception():
+    obj = Option.of('foo')
+    mock_mapper = mock.Mock()
+    mock_mapper.side_effect = Exception('bar')
+
+    actual = obj.try_map(mock_mapper)
+
+    assert actual == Option.empty()
+    mock_mapper.assert_called_once_with('foo')
+
+
+def test_try_map_empty():
+    obj = Option.empty()
+    mock_mapper = mock.Mock()
+    mock_mapper.return_value = 'bar'
+
+    actual = obj.try_map(mock_mapper)
+
+    assert actual == Option.empty()
+    mock_mapper.assert_not_called()
+
+
+def test_try_map_error_handler():
+    obj = Option.of('foo')
+    mock_mapper = mock.Mock()
+    exception = Exception('bar')
+    mock_mapper.side_effect = exception
+    mock_error_handler = mock.Mock()
+    mock_error_handler.return_value = 'baz'
+
+    actual = obj.try_map(mock_mapper, mock_error_handler)
+
+    assert actual == Option.of('baz')
+    mock_mapper.assert_called_once_with('foo')
+    mock_error_handler.assert_called_once_with(exception)
+
+
+def test_try_map_error_handler_return_none():
+    obj = Option.of('foo')
+    mock_mapper = mock.Mock()
+    exception = Exception('bar')
+    mock_mapper.side_effect = exception
+    mock_error_handler = mock.Mock()
+    mock_error_handler.return_value = None
+
+    actual = obj.try_map(mock_mapper, mock_error_handler)
+
+    assert actual == Option.empty()
+    mock_mapper.assert_called_once_with('foo')
+    mock_error_handler.assert_called_once_with(exception)
+
+
+def test_try_map_mapper_is_none():
+    obj = Option.of('foo')
+
+    with pytest.raises(ValueError):
+        obj.try_map(None)
 
 
 def test_or():
