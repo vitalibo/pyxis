@@ -11,7 +11,7 @@ from pyboost.config import Config, ConfigReader, ConfigValueResolver
 __all__ = [
     'S3ConfigReader',
     'SecretsManagerResolver',
-    'SSMResolver',
+    'SystemsManagerResolver',
     'CloudFormationResolver'
 ]
 
@@ -76,7 +76,7 @@ class SecretsManagerResolver(ConfigValueResolver):
         return Config(response).get(json_path)
 
 
-class SSMResolver(ConfigValueResolver):
+class SystemsManagerResolver(ConfigValueResolver):
     """
     A Config value resolver that resolves value from Systems Manager Parameter Store.
     The value must be in the following format:

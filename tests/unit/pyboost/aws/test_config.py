@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 from pyboost import Config
-from pyboost.aws.config import S3ConfigReader, SecretsManagerResolver, SSMResolver, CloudFormationResolver
+from pyboost.aws.config import S3ConfigReader, SecretsManagerResolver, SystemsManagerResolver, CloudFormationResolver
 from pyboost.config import ConfigReader, ConfigValueResolver
 
 
@@ -174,7 +174,7 @@ def test_ssm_resolve(mock_boto3):
     mock_ssm = mock.Mock()
     mock_boto3.return_value = mock_ssm
     mock_ssm.get_parameter.return_value = {'Parameter': {'Value': 'localhost'}}
-    resolver = SSMResolver()
+    resolver = SystemsManagerResolver()
 
     actual = resolver.resolve(Config({}), 'myKey', '{{resolve:ssm:MyParameter}}')
 
@@ -187,7 +187,7 @@ def test_ssm_secure_resolve(mock_boto3):
     mock_ssm = mock.Mock()
     mock_boto3.return_value = mock_ssm
     mock_ssm.get_parameter.return_value = {'Parameter': {'Value': 'localhost'}}
-    resolver = SSMResolver()
+    resolver = SystemsManagerResolver()
 
     actual = resolver.resolve(Config({}), 'myKey', '{{resolve:ssm-secure:MyParameter}}')
 
@@ -200,7 +200,7 @@ def test_ssm_resolve_with_version(mock_boto3):
     mock_ssm = mock.Mock()
     mock_boto3.return_value = mock_ssm
     mock_ssm.get_parameter.return_value = {'Parameter': {'Value': 'localhost'}}
-    resolver = SSMResolver()
+    resolver = SystemsManagerResolver()
 
     actual = resolver.resolve(Config({}), 'myKey', '{{resolve:ssm:MyParameter:123}}')
 
@@ -219,16 +219,16 @@ def test_ssm_resolve_bad_format(mock_boto3, value):
     mock_ssm = mock.Mock()
     mock_boto3.return_value = mock_ssm
     mock_ssm.get_parameter.return_value = {'Parameter': {'Value': 'localhost'}}
-    resolver = SSMResolver()
+    resolver = SystemsManagerResolver()
 
     with pytest.raises(ValueError):
         resolver.resolve(Config({}), 'myKey', value)
 
 
 def test_ssm_resolver_test():
-    assert SSMResolver.test('{{resolve:ssm:MyParam}}') is True
-    assert SSMResolver.test('{{resolve:ssm-secure:MySecret}}') is True
-    assert SSMResolver.test('{{resolve:ssm}}') is False
+    assert SystemsManagerResolver.test('{{resolve:ssm:MyParam}}') is True
+    assert SystemsManagerResolver.test('{{resolve:ssm-secure:MySecret}}') is True
+    assert SystemsManagerResolver.test('{{resolve:ssm}}') is False
 
 
 @mock.patch('boto3.client')
@@ -320,7 +320,7 @@ def test_config_resolver_find_subclass_ssm(mock_boto3):
     actual = ConfigValueResolver.find_subclass('{{resolve:ssm:MyParameter}}')
 
     assert actual.is_present()
-    assert isinstance(actual.get(), SSMResolver)
+    assert isinstance(actual.get(), SystemsManagerResolver)
 
 
 @mock.patch('boto3.client')
@@ -331,7 +331,7 @@ def test_config_resolver_find_subclass_ssm_secure(mock_boto3):
     actual = ConfigValueResolver.find_subclass('{{resolve:ssm-secure:MyParameter}}')
 
     assert actual.is_present()
-    assert isinstance(actual.get(), SSMResolver)
+    assert isinstance(actual.get(), SystemsManagerResolver)
 
 
 @mock.patch('boto3.client')
