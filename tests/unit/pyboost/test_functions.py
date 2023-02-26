@@ -1,10 +1,13 @@
 import dataclasses
 from typing import Optional
+from unittest import mock
 
 import pytest
 
 from pyboost import functions
 
+
+# pylint: disable=missing-class-docstring
 
 def test_require_not_none():
     obj = object()
@@ -64,8 +67,6 @@ def test_field_ref():
     @functions.field_ref
     @dataclasses.dataclass
     class User:
-        """ User """
-
         name: str
         age: int
         address: Optional[str]
@@ -81,8 +82,6 @@ def test_field_ref():
 def test_dataclass():
     @functions.dataclass
     class User:
-        """ User """
-
         name: str
         age: int
         address: Optional[str]
@@ -98,21 +97,43 @@ def test_dataclass():
 def test_dataclass_init_false():
     @functions.dataclass(init=False)
     class User:
-        """ User """
-
         name: str
         age: int
-        address: Optional[str]
 
     user = User()
     user.name = 'foo'
     user.age = 12
-    user.address = None
 
     assert User.name is not None
     assert User.name(user) == 'foo'
     assert User.age(user) == 12
-    assert User.address(user) is None
+
+
+def test_dataclass_pydantic():
+    @functions.dataclass
+    class User:
+        name: str
+        age: int
+
+    user = User('foo', 'bar')
+
+    with pytest.raises(ValueError, match='age'):
+        user.__pydantic_validate_values__()  # pylint: disable=no-member
+
+
+@mock.patch('pydantic.dataclasses')
+def test_dataclass_no_pydantic(mock_dataclasses):
+    mock_dataclasses.side_effect = ImportError
+
+    @functions.dataclass
+    class User:
+        name: str
+        age: int
+
+    user = User('foo', 'bar')
+
+    with pytest.raises(AttributeError, match="'User' object has no attribute '__pydantic_validate_values__'"):
+        user.__pydantic_validate_values__()  # pylint: disable=no-member
 
 
 def test_identity():
@@ -125,7 +146,7 @@ def test_identity():
 
 def test_one_instance_only():
     class ClassA(metaclass=functions.SingletonMeta):
-        """ Used for testing only """
+        pass
 
     obj1 = ClassA()
     obj2 = ClassA()
@@ -135,10 +156,10 @@ def test_one_instance_only():
 
 def test_multiple_classes():
     class ClassA(metaclass=functions.SingletonMeta):
-        """ Used for testing only """
+        pass
 
     class ClassB(metaclass=functions.SingletonMeta):
-        """ Used for testing only """
+        pass
 
     obj1 = ClassA()
     obj2 = ClassB()

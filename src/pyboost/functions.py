@@ -84,6 +84,11 @@ def dataclass(
     def wrap(cls: Type[T]) -> Type[T]:
         cls = dataclasses.dataclass(  # noqa
             cls, init=init, repr=repr, eq=eq, order=order, unsafe_hash=unsafe_hash, frozen=frozen)
+        try:
+            import pydantic.dataclasses  # pylint: disable=import-outside-toplevel
+            pydantic.dataclasses.dataclass(cls)
+        except ImportError:
+            pass
         return field_ref(cls)
 
     if _cls is None:
