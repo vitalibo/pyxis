@@ -78,6 +78,43 @@ def test_field_ref():
     assert User.address(user) is None
 
 
+def test_dataclass():
+    @functions.dataclass
+    class User:
+        """ User """
+
+        name: str
+        age: int
+        address: Optional[str]
+
+    user = User('foo', 12, None)
+
+    assert User.name is not None
+    assert User.name(user) == 'foo'
+    assert User.age(user) == 12
+    assert User.address(user) is None
+
+
+def test_dataclass_init_false():
+    @functions.dataclass(init=False)
+    class User:
+        """ User """
+
+        name: str
+        age: int
+        address: Optional[str]
+
+    user = User()
+    user.name = 'foo'
+    user.age = 12
+    user.address = None
+
+    assert User.name is not None
+    assert User.name(user) == 'foo'
+    assert User.age(user) == 12
+    assert User.address(user) is None
+
+
 def test_identity():
     obj = object()
 

@@ -3,12 +3,14 @@ __all__ = [
     'is_none',
     'not_none',
     'field_ref',
+    'dataclass',
     'identity',
     'function',
     'SingletonMeta'
 ]
 
-from typing import Optional, TypeVar, overload, Callable
+import dataclasses
+from typing import Optional, TypeVar, overload, Callable, Type
 
 T = TypeVar('T')
 
@@ -63,6 +65,30 @@ def field_ref(cls):
     for field in cls.__dataclass_fields__.values():
         setattr(cls, field.name, wraps(field.name))
     return cls
+
+
+def dataclass(
+        _cls: Optional[Type[T]] = None,
+        *,
+        init: bool = True,
+        repr: bool = True,  # pylint: disable=redefined-builtin
+        eq: bool = True,
+        order: bool = False,
+        unsafe_hash: bool = False,
+        frozen: bool = False
+):
+    """
+    Like the python standard lib dataclasses but with enriched field reference
+    """
+
+    def wrap(cls: Type[T]) -> Type[T]:
+        cls = dataclasses.dataclass(  # noqa
+            cls, init=init, repr=repr, eq=eq, order=order, unsafe_hash=unsafe_hash, frozen=frozen)
+        return field_ref(cls)
+
+    if _cls is None:
+        return wrap
+    return wrap(_cls)
 
 
 def identity(obj: T) -> T:

@@ -11,6 +11,7 @@ from .functions import (
     is_none,
     not_none,
     field_ref,
+    dataclass,
     identity,
     function,
     SingletonMeta
