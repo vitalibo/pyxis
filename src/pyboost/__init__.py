@@ -14,6 +14,7 @@ from .functions import (
     dataclass,
     identity,
     function,
+    return_values_as,
     SingletonMeta
 )
 from .option import Option

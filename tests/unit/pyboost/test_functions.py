@@ -165,3 +165,33 @@ def test_multiple_classes():
     obj2 = ClassB()
 
     assert obj1 is not obj2
+
+
+def test_return_values_as_list():
+    @functions.return_values_as(list)
+    def func():
+        yield from [1, 2, 3, 2, 1]
+
+    actual = func()
+
+    assert actual == [1, 2, 3, 2, 1]
+
+
+def test_return_values_as_set():
+    @functions.return_values_as(set)
+    def func():
+        yield from [1, 2, 3, 2, 1]
+
+    actual = func()
+
+    assert actual == {1, 2, 3}
+
+
+def test_return_values_as_dict():
+    @functions.return_values_as(dict)
+    def func():
+        yield from [('foo', 1), ('bar', 2), ('baz', 3)]
+
+    actual = func()
+
+    assert actual == {'foo': 1, 'bar': 2, 'baz': 3}

@@ -6,10 +6,12 @@ __all__ = [
     'dataclass',
     'identity',
     'function',
+    'return_values_as',
     'SingletonMeta'
 ]
 
 import dataclasses
+import functools
 from typing import Optional, TypeVar, overload, Callable, Type
 
 T = TypeVar('T')
@@ -109,6 +111,29 @@ def function(f: Callable) -> Callable:
     A decorator that simply returns the input function, useful for creating higher-order functions.
     """
     return f
+
+
+def return_values_as(mapper):
+    """
+    Decorator that materializes the return value of a generation function.
+
+    >>> @return_values_as(list)
+    >>> def foo():
+    >>>     yield 1
+    >>>     yield 2
+    >>>
+    >>> assert foo() == [1, 2]
+    """
+
+    def inner(func):
+        @functools.wraps(func)
+        def wraps(*argv, **kwargs):
+            return mapper(func(*argv, **kwargs))
+
+        return wraps
+
+    require_not_none(mapper)
+    return inner
 
 
 class SingletonMeta(type):
