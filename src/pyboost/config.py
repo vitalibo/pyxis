@@ -81,6 +81,10 @@ class Config:
     def with_fallback(self, other: Config) -> Config:
         ...
 
+    @overload
+    def with_fallback(self, other: Config, fill_missing: bool) -> Config:
+        ...
+
     def with_fallback(self, other: Config, fill_missing: bool = True) -> Config:
         """
         Returns a new Config that contains the values of this Config, with missing values filled in by the fallback
