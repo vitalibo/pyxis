@@ -33,10 +33,18 @@ def test_config_get_none():
     assert actual is None
 
 
-def test_config_get_default():
+def test_config_get_none_default():
     config = Config({'foo': {'bar': {'baz': None}}})
 
     actual = config.get('foo.bar.baz', 321)
+
+    assert actual is None
+
+
+def test_config_get_default():
+    config = Config({'foo': {'bar': {'baz': None}}})
+
+    actual = config.get('foo.bar.tar', 321)
 
     assert actual == 321
 
@@ -65,10 +73,18 @@ def test_config_get_array_index_none():
     assert actual is None
 
 
-def test_config_get_array_index_default():
+def test_config_get_array_index_none_default():
     config = Config({'foo': {'bar': [{'baz': 123}, {'baz': None}, {'baz': 231}]}})
 
     actual = config.get('foo.bar[1].baz', 321)
+
+    assert actual is None
+
+
+def test_config_get_array_index_default():
+    config = Config({'foo': {'bar': [{'baz': 123}, {'baz': None}, {'baz': 231}]}})
+
+    actual = config.get('foo.bar[1].tar', 321)
 
     assert actual == 321
 
@@ -115,12 +131,12 @@ def test_config_get_array_slice_none():
     assert actual == [None, 1, None, 3, None]
 
 
-def test_config_get_array_slice_default():  # TODO: clarify behavior
-    config = Config({'foo': {'bar': [{'baz': None if i % 2 == 0 else i} for i in range(5)]}})
+def test_config_get_array_slice_default():
+    config = Config({'foo': {'bar': [{('baz' if i % 2 == 0 else 'tar'): i} for i in range(5)]}})
 
-    actual = config.get('foo.bar[:].baz', 321)
+    actual = config.get('foo.bar[:].tar', 321)
 
-    assert actual == [None, 1, None, 3, None]
+    assert actual == [321, 1, 321, 3, 321]
 
 
 def test_config_get_array_bad_slice():

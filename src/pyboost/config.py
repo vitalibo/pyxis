@@ -23,6 +23,8 @@ __all__ = [
 
 T = TypeVar('T')
 
+_DEFAULT = object()
+
 
 class Config:
     """
@@ -41,12 +43,12 @@ class Config:
     def get(self, key: str, default: T) -> T:
         ...
 
-    def get(self, key: str, default: Optional[T] = None) -> Optional[T]:
+    def get(self, key: str, default: Optional[T] = _DEFAULT) -> Optional[T]:
         """
         Get the value associated with a specific key in the configuration tree.
 
         :param key: the key to retrieve the value for
-        :param default: the default value to return if the value is None
+        :param default: the default value to return if key is not found
         :return: the value associated with the specified key, or the default value
         """
 
@@ -70,12 +72,12 @@ class Config:
                     except ValueError as e:
                         raise ConfigException(f'illegal slice [{path}]') from e
                 else:
-                    raise ConfigException(f'no config found for key "{key}"')
+                    if default is _DEFAULT:
+                        raise ConfigException(f'no config found for key "{key}"')
+                    return default
             return root
 
-        return Option \
-            .of_nullable(traverse(self.__root, key.replace('[', '.[').split('.'))) \
-            .or_else(default)
+        return traverse(self.__root, key.replace('[', '.[').split('.'))
 
     @overload
     def with_fallback(self, other: Config) -> Config:
