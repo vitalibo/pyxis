@@ -5,8 +5,8 @@ from typing import Any
 
 import boto3
 
-from pyboost import function
 from pyboost.config import Config, ConfigReader, ConfigValueResolver
+from pyboost.functions import function
 
 __all__ = [
     'S3ConfigReader',
