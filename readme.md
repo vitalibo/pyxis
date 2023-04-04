@@ -7,7 +7,7 @@ Pure Python collection of helpful classes for boosting your productivity
 ### Installation
 
 ```bash
-pip install 'git+https://github.com/vitalibo/pyboost.git@0.1.0'
+pip install 'git+https://github.com/vitalibo/pyboost.git@0.1.1'
 ```
 
 ### Usage
