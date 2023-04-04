@@ -7,14 +7,15 @@ Pure Python collection of helpful classes for boosting your productivity
 ### Installation
 
 ```bash
-pip install 'git+https://github.com/vitalibo/pyboost.git@main'
+pip install 'git+https://github.com/vitalibo/pyboost.git@0.1.0'
 ```
 
 ### Usage
 
 ```python
 from dataclasses import dataclass
-from pyboost import Stream, field_ref
+from pyboost.streams import Stream
+from pyboost.functions import field_ref
 
 
 @field_ref
