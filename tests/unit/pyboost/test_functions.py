@@ -167,6 +167,12 @@ def test_multiple_classes():
     assert obj1 is not obj2
 
 
+def test_unpack():
+    unpacked = functions.unpack(lambda x, y: x + y)
+
+    assert unpacked((1, 2)) == 3
+
+
 def test_return_values_as_list():
     @functions.return_values_as(list)
     def func():

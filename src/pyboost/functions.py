@@ -6,6 +6,7 @@ __all__ = [
     'dataclass',
     'identity',
     'function',
+    'unpack',
     'return_values_as',
     'SingletonMeta'
 ]
@@ -111,6 +112,18 @@ def function(f: Callable) -> Callable:
     A decorator that simply returns the input function, useful for creating higher-order functions.
     """
     return f
+
+
+def unpack(f: Callable) -> Callable:
+    """
+    A decorator that unpacks the input argument and passes it to the decorated function.
+    """
+
+    @functools.wraps(f)
+    def wrap(value):
+        return f(*value)
+
+    return wrap
 
 
 def return_values_as(mapper):
