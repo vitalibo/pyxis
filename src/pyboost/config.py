@@ -126,13 +126,13 @@ class Config:
                 except Exception as e:
                     raise ConfigException(f'failed to resolve value for key "{path[1:]}": {e}') from e
             elif isinstance(node, dict):
-                return {key: traversal(f'{path}{key}', value) for key, value in node.items()}
+                return {key: traversal(f'{path}.{key}', value) for key, value in node.items()}
             elif isinstance(node, list):
                 return [traversal(f'{path}[{i}]', value) for i, value in enumerate(node)]
             else:
                 return node
 
-        return Config(traversal('.', self.__root))
+        return Config(traversal('', self.__root))
 
     def keys(self) -> List[str]:
         # workaround for creating a dict from a config object

@@ -1,11 +1,13 @@
 import os
 import sys
+from typing import Any
 from unittest import mock
 
 import pytest
 
 from pyboost.config import Config, ConfigException, ConfigFactory, LocalFileConfigReader, JsonConfigParser, \
-    IniConfigParser, ConfigParser, ConfigReader, YamlConfigParser
+    IniConfigParser, ConfigParser, ConfigReader, YamlConfigParser, ConfigValueResolver
+from pyboost.functions import function
 
 
 def test_config_get():
@@ -465,6 +467,24 @@ def test_config_resolve_with_loop():
 
     with pytest.raises(ConfigException):
         config.resolve()
+
+
+def test_config_resolve_call_resolver():
+    class TestResolver(ConfigValueResolver):  # pylint: disable=missing-class-docstring,unused-variable
+        test = function(lambda x: x.startswith('test'))
+
+        def resolve(self, _config: Config, key: str, value: str) -> Any:
+            method_mock = mock.Mock()
+            method_mock(key, value)
+            return method_mock
+
+    config = Config({'foo': {'bar': {'baz': 'test:1'}}, 'bar': ['test:2', {'baz': 'test:3'}]})
+
+    actual = config.resolve()
+
+    actual['foo.bar.baz'].assert_called_once_with('foo.bar.baz', 'test:1')
+    actual['bar[0]'].assert_called_once_with('bar[0]', 'test:2')
+    actual['bar[1].baz'].assert_called_once_with('bar[1].baz', 'test:3')
 
 
 def test_config_factory_empty():
