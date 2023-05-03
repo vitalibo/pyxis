@@ -1,19 +1,16 @@
+import functools
+from typing import Optional, TypeVar, overload, Callable
+
 __all__ = [
     'require_not_none',
     'is_none',
     'not_none',
-    'field_ref',
-    'dataclass',
     'identity',
     'function',
     'unpack',
     'return_values_as',
     'SingletonMeta'
 ]
-
-import dataclasses
-import functools
-from typing import Optional, TypeVar, overload, Callable, Type
 
 T = TypeVar('T')
 
@@ -52,51 +49,6 @@ def not_none(obj: T) -> bool:
     """
 
     return obj is not None
-
-
-def field_ref(cls):
-    """
-    Decorator to enrich field reference to dataclasses
-    """
-
-    def wraps(name):
-        def func(self):
-            return getattr(self, name)
-
-        return func
-
-    for field in cls.__dataclass_fields__.values():
-        setattr(cls, field.name, wraps(field.name))
-    return cls
-
-
-def dataclass(
-        _cls: Optional[Type[T]] = None,
-        *,
-        init: bool = True,
-        repr: bool = True,  # pylint: disable=redefined-builtin
-        eq: bool = True,
-        order: bool = False,
-        unsafe_hash: bool = False,
-        frozen: bool = False
-):
-    """
-    Like the python standard lib dataclasses but with enriched field reference
-    """
-
-    def wrap(cls: Type[T]) -> Type[T]:
-        cls = dataclasses.dataclass(  # noqa
-            cls, init=init, repr=repr, eq=eq, order=order, unsafe_hash=unsafe_hash, frozen=frozen)
-        try:
-            import pydantic.dataclasses  # pylint: disable=import-outside-toplevel
-            pydantic.dataclasses.dataclass(cls)
-        except ImportError:
-            pass
-        return field_ref(cls)
-
-    if _cls is None:
-        return wrap
-    return wrap(_cls)
 
 
 def identity(obj: T) -> T:
