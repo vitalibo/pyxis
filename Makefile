@@ -1,4 +1,4 @@
-PYTHON := python3.7
+PYTHON := python3
 
 help: ## show this help
 	@echo "Usage: \033[36mmake <command name> <param name>=<param value> ...\033[0m"
