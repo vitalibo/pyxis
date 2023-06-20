@@ -4,7 +4,6 @@ from pyboost import functions
 
 
 # pylint: disable=missing-class-docstring
-
 def test_require_not_none():
     obj = object()
 

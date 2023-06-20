@@ -1,4 +1,4 @@
-from typing import Set, List, Iterator, Dict
+from typing import Dict, Iterator, List, Set
 from unittest import mock
 
 import pytest

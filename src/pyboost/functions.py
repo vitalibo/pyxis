@@ -1,5 +1,5 @@
 import functools
-from typing import Optional, TypeVar, overload, Callable
+from typing import Callable, Optional, TypeVar, overload
 
 __all__ = [
     'require_not_none',

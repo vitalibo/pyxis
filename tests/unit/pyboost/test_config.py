@@ -5,8 +5,18 @@ from unittest import mock
 
 import pytest
 
-from pyboost.config import Config, ConfigException, ConfigFactory, LocalFileConfigReader, JsonConfigParser, \
-    IniConfigParser, ConfigParser, ConfigReader, YamlConfigParser, ConfigValueResolver
+from pyboost.config import (
+    Config,
+    ConfigException,
+    ConfigFactory,
+    ConfigParser,
+    ConfigReader,
+    ConfigValueResolver,
+    IniConfigParser,
+    JsonConfigParser,
+    LocalFileConfigReader,
+    YamlConfigParser
+)
 from pyboost.functions import function
 
 

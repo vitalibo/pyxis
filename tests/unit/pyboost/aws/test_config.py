@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from pyboost.aws.config import S3ConfigReader, SecretsManagerResolver, SystemsManagerResolver, CloudFormationResolver
+from pyboost.aws.config import CloudFormationResolver, S3ConfigReader, SecretsManagerResolver, SystemsManagerResolver
 from pyboost.config import Config, ConfigReader, ConfigValueResolver
 
 

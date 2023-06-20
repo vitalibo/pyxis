@@ -8,7 +8,6 @@ from pyboost.dataclasses import dataclass, reference
 
 
 # pylint: disable=missing-class-docstring
-
 def test_field_reference():
     @reference
     @dataclasses.dataclass

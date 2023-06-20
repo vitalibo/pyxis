@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import (
-    Generic, TypeVar, Callable, Any, Optional, overload
-)
+from typing import Any, Callable, Generic, Optional, TypeVar, overload
 
 __all__ = [
     'Option'
