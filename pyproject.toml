@@ -1,0 +1,30 @@
+[tool.poetry]
+name        = "pyboost"
+version     = "0.1.5"
+description = "Python collection of helpful classes for boosting your productivity"
+authors     = ["Vitaliy Boyarsky <boyarsky.vitaliy@live.com>"]
+license     = "MIT"
+readme      = "readme.md"
+
+[tool.poetry.dependencies]
+python = ">=3.7.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest     = "~7.2.1"
+pylint     = "~2.15.10"
+poethepoet = "~0.19.0"
+pyyaml     = "^6.0"
+boto3      = "^1.26.0"
+pydantic   = "^1.10.5"
+
+[tool.poe]
+poetry_command = ""
+
+[tool.poe.tasks]
+style = { cmd = "pylint ./src/ ./tests/ --rcfile=.pylintrc", help = "Run static code analyser." }
+test  = { cmd = "pytest -v -p no:cacheprovider ./tests/", help = "Run unit tests." }
+clean = { cmd = "rm -rf ./.pytest_cache ./build ./dist ./src/*.egg-info", help = "Clean workdir." }
+
+[build-system]
+requires      = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

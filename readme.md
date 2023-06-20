@@ -2,7 +2,7 @@
 
 ![status](https://github.com/vitalibo/pyboost/actions/workflows/ci.yaml/badge.svg)
 
-Pure Python collection of helpful classes for boosting your productivity
+Python collection of helpful classes for boosting your productivity
 
 ### Installation
 

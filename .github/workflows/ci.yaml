@@ -6,13 +6,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  code-quality:
+    name: Check code quality
+
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
-    
     strategy:
       matrix:
         python-version: [ '3.7', '3.8', '3.9', '3.10', '3.11' ]
@@ -21,11 +19,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Poetry
+        run: pipx install poetry
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: poetry
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Check code formatting
+        run: poetry run poe style
 
       - name: Run tests
-        run: |
-          make init checkstyle test
+        run: poetry run poe test
