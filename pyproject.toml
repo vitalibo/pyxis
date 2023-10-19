@@ -1,6 +1,6 @@
 [tool.poetry]
 name        = "pyboost"
-version     = "0.1.6"
+version     = "0.1.7"
 description = "Python collection of helpful classes for boosting your productivity"
 authors     = ["Vitaliy Boyarsky <boyarsky.vitaliy@live.com>"]
 license     = "MIT"

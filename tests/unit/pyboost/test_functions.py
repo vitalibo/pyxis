@@ -123,3 +123,51 @@ def test_return_values_as_dict():
     actual = func()
 
     assert actual == {'foo': 1, 'bar': 2, 'baz': 3}
+
+
+def test_function_apply():
+    actual = functions.function(lambda x: x + 1)
+
+    assert actual.apply(10) == 11
+
+
+def test_function_compose():
+    this = functions.function(lambda x: x + 1)
+    other = functions.function(lambda x: x * 2)
+
+    actual = this.compose(other)
+
+    assert actual(10) == 21
+
+
+def test_function_and_then():
+    this = functions.function(lambda x: x + 1)
+    other = functions.function(lambda x: x * 2)
+
+    actual = this.and_then(other)
+
+    assert actual(10) == 22
+
+
+def test_function_call():
+    actual = functions.function(lambda x: x + 1)
+
+    assert actual(10) == 11
+
+
+def test_function_rshift():
+    this = functions.function(lambda x: x + 1)
+    other = functions.function(lambda x: x * 2)
+
+    actual = this << other
+
+    assert actual(10) == 21
+
+
+def test_function_lshift():
+    this = functions.function(lambda x: x + 1)
+    other = functions.function(lambda x: x * 2)
+
+    actual = this >> other
+
+    assert actual(10) == 22

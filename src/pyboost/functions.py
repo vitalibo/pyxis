@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 from typing import Callable, Optional, TypeVar, overload
 
@@ -13,6 +15,7 @@ __all__ = [
 ]
 
 T = TypeVar('T')
+R = TypeVar('R')
 
 
 @overload
@@ -57,13 +60,6 @@ def identity(obj: T) -> T:
     """
 
     return obj
-
-
-def function(f: Callable) -> Callable:
-    """
-    A decorator that simply returns the input function, useful for creating higher-order functions.
-    """
-    return f
 
 
 def unpack(f: Callable) -> Callable:
@@ -115,3 +111,44 @@ class SingletonMeta(type):
         if cls not in cls.__instances:
             cls.__instances[cls] = super().__call__(*args, **kwargs)
         return cls.__instances[cls]
+
+
+class function:  # pylint: disable=invalid-name
+    """
+    Represents a function that accepts one or more arguments and produces a result.
+    """
+
+    def __init__(self, this: Callable[[T], R]):
+        self._this = require_not_none(this)
+
+    def __call__(self, *args, **kwargs):
+        return self.apply(*args, **kwargs)
+
+    def __rshift__(self, other: Callable) -> function:
+        return self.and_then(other)
+
+    def __lshift__(self, other: Callable) -> function:
+        return self.compose(other)
+
+    def compose(self, other: Callable) -> function:
+        """
+        Returns a composed function that first applies the other function to its input,
+        and then applies this function to the result.
+        """
+
+        return function(lambda *args, **kwargs: self._this(require_not_none(other)(*args, **kwargs)))
+
+    def and_then(self, other: Callable) -> function:
+        """
+        Returns a composed function that first applies this function to its input,
+        and then applies the other function to the result.
+        """
+
+        return function(lambda *args, **kwargs: require_not_none(other)(self._this(*args, **kwargs)))
+
+    def apply(self, *args, **kwargs):
+        """
+        Applies this function to the given arguments.
+        """
+
+        return self._this(*args, **kwargs)
