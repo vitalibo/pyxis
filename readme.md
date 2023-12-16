@@ -10,7 +10,7 @@ to tackle complex challenges efficiently.
 ### Installation
 
 ```bash
-pip install 'git+https://github.com/vitalibo/pyxis.git@0.2.0'
+pip install 'git+https://github.com/vitalibo/pyxis.git@0.2.1'
 ```
 
 ### Usage

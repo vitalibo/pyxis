@@ -184,8 +184,10 @@ class ConfigFactory:
         for extension in ['json', 'yaml', 'ini', 'properties']:
             try:
                 return ConfigFactory.load(f'application.{extension}')
-            except (ConfigException, FileNotFoundError):
-                pass
+            except (ConfigException, FileNotFoundError) as e:
+                if isinstance(e, ConfigException) and \
+                        'no reader found' not in str(e) and 'no format parser found' not in str(e):
+                    raise e
 
         config = ConfigFactory.arguments()
         return ConfigFactory.load(config.args.config_file)

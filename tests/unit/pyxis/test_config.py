@@ -638,7 +638,7 @@ def test_config_factory_default_load():
 
 def test_config_factory_default_load_not_found():
     with mock.patch('pyxis.config.ConfigFactory.load') as mock_load:
-        mock_load.side_effect = FileNotFoundError, ConfigException, Config({'foo': 'bar'})
+        mock_load.side_effect = FileNotFoundError, ConfigException('no reader found for file'), Config({'foo': 'bar'})
 
         actual = ConfigFactory.default_load()
 
@@ -652,7 +652,8 @@ def test_config_factory_default_load_use_arguments():
     with mock.patch('pyxis.config.ConfigFactory.load') as mock_load, \
             mock.patch('pyxis.config.ConfigFactory.arguments') as mock_arguments:
         mock_load.side_effect = [
-            FileNotFoundError, ConfigException, FileNotFoundError, ConfigException, Config({'foo': 'bar'})
+            FileNotFoundError, ConfigException('no reader found for file'),
+            FileNotFoundError, ConfigException('no format parser found for file'), Config({'foo': 'bar'})
         ]
         mock_arguments.return_value = Config({'args': {'config_file': 's3://bucket/config.json'}})
 
@@ -662,6 +663,18 @@ def test_config_factory_default_load_use_arguments():
         mock_load.assert_has_calls([
             mock.call('application.json'), mock.call('application.yaml'), mock.call('application.ini'),
             mock.call('application.properties'), mock.call('s3://bucket/config.json')
+        ])
+
+
+def test_config_factory_default_load_raise_resolve_error():
+    with mock.patch('pyxis.config.ConfigFactory.load') as mock_load:
+        mock_load.side_effect = FileNotFoundError, ConfigException('any resolve error'), Config({'foo': 'bar'})
+
+        with pytest.raises(ConfigException, match='any resolve error'):
+            ConfigFactory.default_load()
+
+        mock_load.assert_has_calls([
+            mock.call('application.json'), mock.call('application.yaml')
         ])
 
 
