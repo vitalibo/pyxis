@@ -1,24 +1,27 @@
-# PyBoost
+# PyXIS
 
-![status](https://github.com/vitalibo/pyboost/actions/workflows/ci.yaml/badge.svg)
+![status](https://github.com/vitalibo/pyxis/actions/workflows/ci.yaml/badge.svg)
 
-Python collection of helpful classes for boosting your productivity
+Pyxis is a comprehensive Python toolkit designed to enhance developer productivity.
+It offers a suite of tools and classes that streamline various aspects of software development.
+From data stream processing to advanced configuration management, Pyxis provides an array of functionalities
+to tackle complex challenges efficiently.
 
 ### Installation
 
 ```bash
-pip install 'git+https://github.com/vitalibo/pyboost.git@0.1.7'
+pip install 'git+https://github.com/vitalibo/pyxis.git@0.2.0'
 ```
 
 ### Usage
 
 ```python
 from dataclasses import dataclass
-from pyboost.streams import Stream
-from pyboost.functions import field_ref
+from pyxis.dataclasses import reference
+from pyxis.streams import Stream
 
 
-@field_ref
+@reference
 @dataclass
 class User:
     name: str

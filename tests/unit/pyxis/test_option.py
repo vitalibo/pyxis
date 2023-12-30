@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from pyboost.option import Option, _Empty
+from pyxis.option import Option, _Empty
 
 
 def test_empty():

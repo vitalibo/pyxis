@@ -1,7 +1,7 @@
 [tool.poetry]
-name        = "pyboost"
-version     = "0.1.7"
-description = "Python collection of helpful classes for boosting your productivity"
+name        = "pyxis"
+version     = "0.2.0"
+description = "An essential Python toolkit for peak productivity"
 authors     = ["Vitaliy Boyarsky <boyarsky.vitaliy@live.com>"]
 license     = "MIT"
 readme      = "readme.md"

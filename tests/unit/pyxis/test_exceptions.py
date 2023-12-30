@@ -1,6 +1,6 @@
 import pytest
 
-from pyboost.exceptions import IllegalArgumentException, IllegalStateException
+from pyxis.exceptions import IllegalArgumentException, IllegalStateException
 
 
 def test_illegal_argument_exception():

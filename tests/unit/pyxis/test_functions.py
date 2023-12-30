@@ -1,6 +1,6 @@
 import pytest
 
-from pyboost import functions
+from pyxis import functions
 
 
 # pylint: disable=missing-class-docstring

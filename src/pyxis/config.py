@@ -9,8 +9,8 @@ import re
 import sys
 from typing import Any, Dict, List, Optional, TypeVar, overload
 
-from pyboost.functions import function, require_not_none
-from pyboost.option import Option
+from pyxis.functions import function, require_not_none
+from pyxis.option import Option
 
 __all__ = [
     'Config',

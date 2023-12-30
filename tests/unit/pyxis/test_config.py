@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 
-from pyboost.config import (
+from pyxis.config import (
     Config,
     ConfigException,
     ConfigFactory,
@@ -17,7 +17,7 @@ from pyboost.config import (
     LocalFileConfigReader,
     YamlConfigParser
 )
-from pyboost.functions import function
+from pyxis.functions import function
 
 
 def test_config_get():
@@ -619,7 +619,7 @@ def test_config_factory_unsupported_file_type():
 
 
 def test_config_factory_load():
-    with mock.patch('pyboost.config.ConfigFactory.default_application', return_value=Config({'foo': 'bar'})), \
+    with mock.patch('pyxis.config.ConfigFactory.default_application', return_value=Config({'foo': 'bar'})), \
             mock.patch('builtins.open', mock.mock_open(read_data='{"bar": 123}')) as mock_file:
         actual = ConfigFactory.load('config.json')
 
@@ -628,7 +628,7 @@ def test_config_factory_load():
 
 
 def test_config_factory_default_load():
-    with mock.patch('pyboost.config.ConfigFactory.default_application', return_value=Config({'foo': 'bar'})), \
+    with mock.patch('pyxis.config.ConfigFactory.default_application', return_value=Config({'foo': 'bar'})), \
             mock.patch('builtins.open', mock.mock_open(read_data='{"bar": 123}')) as mock_file:
         actual = ConfigFactory.default_load()
 
@@ -637,7 +637,7 @@ def test_config_factory_default_load():
 
 
 def test_config_factory_default_load_not_found():
-    with mock.patch('pyboost.config.ConfigFactory.load') as mock_load:
+    with mock.patch('pyxis.config.ConfigFactory.load') as mock_load:
         mock_load.side_effect = FileNotFoundError, ConfigException, Config({'foo': 'bar'})
 
         actual = ConfigFactory.default_load()
@@ -649,8 +649,8 @@ def test_config_factory_default_load_not_found():
 
 
 def test_config_factory_default_load_use_arguments():
-    with mock.patch('pyboost.config.ConfigFactory.load') as mock_load, \
-            mock.patch('pyboost.config.ConfigFactory.arguments') as mock_arguments:
+    with mock.patch('pyxis.config.ConfigFactory.load') as mock_load, \
+            mock.patch('pyxis.config.ConfigFactory.arguments') as mock_arguments:
         mock_load.side_effect = [
             FileNotFoundError, ConfigException, FileNotFoundError, ConfigException, Config({'foo': 'bar'})
         ]

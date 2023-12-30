@@ -3,8 +3,8 @@ from unittest import mock
 
 import pytest
 
-from pyboost.aws.config import CloudFormationResolver, S3ConfigReader, SecretsManagerResolver, SystemsManagerResolver
-from pyboost.config import Config, ConfigReader, ConfigValueResolver
+from pyxis.aws.config import CloudFormationResolver, S3ConfigReader, SecretsManagerResolver, SystemsManagerResolver
+from pyxis.config import Config, ConfigReader, ConfigValueResolver
 
 
 @mock.patch('boto3.resource')

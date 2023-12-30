@@ -2,7 +2,7 @@ from enum import Enum
 
 import pytest
 
-from pyboost.enum import EnumMixin
+from pyxis.enum import EnumMixin
 
 
 class Weekday(EnumMixin, Enum):

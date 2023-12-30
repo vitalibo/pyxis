@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from pyboost.dataclasses import dataclass, reference
+from pyxis.dataclasses import dataclass, reference
 
 
 # pylint: disable=missing-class-docstring
