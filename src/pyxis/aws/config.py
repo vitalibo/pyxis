@@ -5,10 +5,12 @@ from typing import Any
 
 import boto3
 
-from pyxis.config import Config, ConfigReader, ConfigValueResolver
+from pyxis.config import Config, ConfigReader, ConfigValueResolver, ConfigFactory
 from pyxis.functions import function
 
 __all__ = [
+    'Config',
+    'ConfigFactory',
     'S3ConfigReader',
     'SecretsManagerResolver',
     'SystemsManagerResolver',
