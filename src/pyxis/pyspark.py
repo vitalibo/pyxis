@@ -260,7 +260,7 @@ class LocalTestSpark(Spark):
         if os.environ.get('PYBOOST_PYSPARK_REFORMAT_JSON', '').lower() not in ['true', '1']:
             return df
 
-        formatted_json = json.dumps(json.loads(str(df.toJSON().collect()).replace("'", '')), indent=2)
+        formatted_json = json.dumps(df.collectToJSON(), indent=2)
         with open(resources.resource(root, path), 'w', encoding='utf-8') as f:
             f.write(formatted_json + '\n')
 
@@ -269,7 +269,7 @@ class LocalTestSpark(Spark):
     @staticmethod
     def assert_dataframe_equals(
             actual: DataFrame, expected: DataFrame, *args, ignore_schema: bool = False, order_by: List[str] = None,
-            **kwargs
+            schema: StructType = None, **kwargs
     ) -> None:
         """
         Asserts that two :class:`pyspark.sql.DataFrame` instances are equal.
@@ -278,15 +278,16 @@ class LocalTestSpark(Spark):
         :param expected: :class:`pyspark.sql.DataFrame` instance.
         :param ignore_schema: Flag indicating whether to ignore schema.
         :param order_by: List of columns to order by.
+        :param schema: Expected schema to compare against.
         """
 
         if order_by is not None:
             actual = actual.orderBy(*order_by)
 
         if not ignore_schema:
-            assert actual.schema == expected.schema
+            assert (schema or actual.schema) == expected.schema
 
-        assert actual.collect() == expected.collect()
+        assert actual.collectToJSON() == expected.collectToJSON()
 
 
 def __get_num_partitions(self: DataFrame) -> int:
@@ -331,6 +332,18 @@ def __json_as_struct_type(schema: Dict[str, Any]) -> StructType:
     return StructType.fromJson(fill_nullable_fields(schema))
 
 
+def __collect_to_json(df: DataFrame) -> List[Dict[str, Any]]:
+    """
+    Collects the :class:`pyspark.sql.DataFrame` to a list of JSON objects.
+
+    :param df: :class:`pyspark.sql.DataFrame` instance.
+    :return: List of dictionaries representing the DataFrame in JSON format.
+    """
+
+    return json.loads(str(df.toJSON().collect()).replace("'", ''))
+
+
 DataFrame.getNumPartitions = __get_num_partitions
 Column.getName = __get_name
 StructType.from_json = __json_as_struct_type
+DataFrame.collectToJSON = __collect_to_json
