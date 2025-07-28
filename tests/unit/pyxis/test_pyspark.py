@@ -174,7 +174,8 @@ def test_struct_type_from_json():
             {'name': 'col10', 'type': 'date'},
             {'name': 'col11', 'type': {'containsNull': False, 'elementType': 'string', 'type': 'array'}},
             {'name': 'col12', 'type': {'fields': [{'name': 'f1', 'type': 'string'}, {'name': 'f2', 'type': 'integer'}], 'type': 'struct'}},  # pylint: disable=line-too-long
-            {'name': 'col13', 'type': {'type': 'map', 'keyType': 'string', 'valueType': 'integer', 'valueContainsNull': True}}  # pylint: disable=line-too-long
+            {'name': 'col13', 'type': {'type': 'map', 'keyType': 'string', 'valueType': 'integer', 'valueContainsNull': True}},  # pylint: disable=line-too-long
+            {'name': 'col14', 'type': {'type': 'map', 'keyType': 'string', 'valueType': {'fields': [{'name': 'f1', 'type': 'string'}, {'name': 'f2', 'type': 'integer'}], 'type': 'struct'}, 'valueContainsNull': True}}  # pylint: disable=line-too-long
         ],
         'type': 'struct'
     }  # @formatter:on
@@ -198,6 +199,7 @@ def test_struct_type_from_json():
     assert actual['col11'].dataType.simpleString() == 'array<string>'
     assert actual['col12'].dataType.simpleString() == 'struct<f1:string,f2:int>'
     assert actual['col13'].dataType.simpleString() == 'map<string,int>'
+    assert actual['col14'].dataType.simpleString() == 'map<string,struct<f1:string,f2:int>>'
 
 
 @pytest.fixture(scope='module', name='spark')

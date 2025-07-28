@@ -326,6 +326,9 @@ def __json_as_struct_type(schema: Dict[str, Any]) -> StructType:
                 if field['type']['type'] == 'array' and 'type' in field['type']['elementType'] and \
                         field['type']['elementType']['type'] == 'struct':
                     field['type']['elementType'] = fill_nullable_fields(field['type']['elementType'])
+                if field['type']['type'] == 'map' and 'type' in field['type']['valueType'] and \
+                        field['type']['valueType']['type'] == 'struct':
+                    field['type']['valueType'] = fill_nullable_fields(field['type']['valueType'])
 
         return node
 
