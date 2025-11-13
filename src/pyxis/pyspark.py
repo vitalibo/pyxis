@@ -288,7 +288,7 @@ class LocalTestSpark(Spark):
             actual = actual.orderBy(*order_by)
 
         if not ignore_schema:
-            assert (schema or actual.schema) == expected.schema
+            assert actual.schema == (schema or expected.schema)
 
         assert actual.collectToJSON() == expected.collectToJSON()
 
