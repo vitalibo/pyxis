@@ -346,7 +346,7 @@ def __collect_to_json(df: DataFrame) -> List[Dict[str, Any]]:
     :return: List of dictionaries representing the DataFrame in JSON format.
     """
 
-    return json.loads(str(df.toJSON().collect()).replace("'", ''))
+    return [json.loads(row) for row in df.toJSON().collect()]
 
 
 DataFrame.getNumPartitions = __get_num_partitions
