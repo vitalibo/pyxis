@@ -225,7 +225,10 @@ class LocalTestSpark(Spark):
             def load(self, spark: LocalTestSpark, df: DataFrame, *_args, **_kwargs) -> None:
                 expected = spark.create_dataframe_from_resource(
                     root, path, schema_path, *_args, *args, **_kwargs, **kwargs)
-                cls.assert_dataframe_equals(df, expected, *_args, *args, **_kwargs, **kwargs)
+                local_kwargs = {}
+                if 'strict_schema' in kwargs and kwargs['strict_schema']:
+                    local_kwargs['schema'] = StructType.from_json(resources.resource_as_json(root, schema_path))
+                cls.assert_dataframe_equals(df, expected, *_args, *args, **_kwargs, **kwargs, **local_kwargs)
 
         return _TestSink()
 
