@@ -227,7 +227,7 @@ class LocalTestSpark(Spark):
                     root, path, schema_path, *_args, *args, **_kwargs, **kwargs)
                 local_kwargs = {}
                 if 'strict_schema' in kwargs and kwargs['strict_schema']:
-                    local_kwargs['schema'] = StructType.from_json(resources.resource_as_json(root, schema_path))
+                    local_kwargs['schema'] = StructType.from_json(resources.load_json(root, schema_path))
                 cls.assert_dataframe_equals(df, expected, *_args, *args, **_kwargs, **kwargs, **local_kwargs)
 
         return _TestSink()
@@ -255,7 +255,7 @@ class LocalTestSpark(Spark):
         df = self \
             .spark_session.read \
             .option('multiLine', True) \
-            .schema(StructType.from_json(resources.resource_as_json(root, schema_path))) \
+            .schema(StructType.from_json(resources.load_json(root, schema_path))) \
             .json(rdd)
 
         # reformat json to make it more readable

@@ -9,9 +9,9 @@ def test_resource():
     assert actual.endswith('tests/unit/pyxis/data/scratch.txt')
 
 
-def test_resource_as_str():
+def test_load_text():
     with mock.patch('builtins.open', mock.mock_open(read_data='foo')) as mock_open:
-        actual = resources.resource_as_str(__file__, 'data/scratch.txt')
+        actual = resources.load_text(__file__, 'data/scratch.txt')
 
         assert actual == 'foo'
         call_args = mock_open.call_args
@@ -20,24 +20,38 @@ def test_resource_as_str():
         assert call_args[1] == {'encoding': 'utf-8'}
 
 
-def test_resource_as_str_encoding():
+def test_load_text_encoding():
     with mock.patch('builtins.open', mock.mock_open(read_data='foo')) as mock_open:
-        actual = resources.resource_as_str(__file__, 'data/scratch.txt', encoding='utf-16')
+        actual = resources.load_text(__file__, 'data/scratch.txt', encoding='utf-16')
 
         assert actual == 'foo'
         call_args = mock_open.call_args
         assert call_args[1] == {'encoding': 'utf-16'}
 
 
-def test_resource_as_json():
+def test_load_json():
     with mock.patch('builtins.open', mock.mock_open(read_data='{"foo": "bar"}')):
-        actual = resources.resource_as_json(__file__, 'data/scratch.json')
+        actual = resources.load_json(__file__, 'data/scratch.json')
 
         assert actual == {'foo': 'bar'}
 
 
-def test_resource_as_json_str():
+def test_load_json_as_text():
     with mock.patch('builtins.open', mock.mock_open(read_data='{\n  "foo": "bar"\n}\n')):
-        actual = resources.resource_as_json_str(__file__, 'data/scratch.json')
+        actual = resources.load_json_as_text(__file__, 'data/scratch.json')
 
         assert actual == '{"foo": "bar"}'
+
+
+def test_load_yaml():
+    with mock.patch('builtins.open', mock.mock_open(read_data='foo: bar\nbaz: qux\n')):
+        actual = resources.load_yaml(__file__, 'data/scratch.yaml')
+
+        assert actual == {'foo': 'bar', 'baz': 'qux'}
+
+
+def test_load_yaml_all():
+    with mock.patch('builtins.open', mock.mock_open(read_data='foo: bar\n---\nbaz: qux\n')):
+        actual = list(resources.load_yaml_all(__file__, 'data/scratch.yaml'))
+
+        assert actual == [{'foo': 'bar'}, {'baz': 'qux'}]
