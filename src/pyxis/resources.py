@@ -53,7 +53,7 @@ def load_yaml(root: str, path: str, **kwargs):
     >>> content = load_yaml(__file__, 'foo/bar.yaml')
     """
 
-    import yaml
+    import yaml  # pylint: disable=import-outside-toplevel
 
     return yaml.safe_load(load_text(root, path, **kwargs))
 
@@ -65,6 +65,6 @@ def load_yaml_all(root: str, path: str, **kwargs):
     >>> content = load_yaml_all(__file__, 'foo/bar.yaml')
     """
 
-    import yaml
+    import yaml  # pylint: disable=import-outside-toplevel
 
     return list(yaml.safe_load_all(load_text(root, path, **kwargs)))

@@ -1,6 +1,6 @@
 [tool.poetry]
 name        = "pyxis"
-version     = "0.2.8"
+version     = "0.2.10"
 description = "An essential Python toolkit for peak productivity"
 authors     = ["Vitaliy Boyarsky <boyarsky.vitaliy@live.com>"]
 license     = "MIT"
