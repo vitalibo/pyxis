@@ -10,7 +10,13 @@ to tackle complex challenges efficiently.
 ### Installation
 
 ```bash
-pip install 'git+https://github.com/vitalibo/pyxis.git@0.2.10-pyspark'
+pip install vitalibo.pyxis==0.2.11
+```
+
+or install from GitHub:
+
+```bash
+pip install 'git+https://github.com/vitalibo/pyxis.git@0.2.11'
 ```
 
 ### Usage
