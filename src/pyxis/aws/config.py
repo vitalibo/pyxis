@@ -5,7 +5,7 @@ from typing import Any
 
 import boto3
 
-from pyxis.config import Config, ConfigReader, ConfigValueResolver, ConfigFactory
+from pyxis.config import Config, ConfigFactory, ConfigReader, ConfigValueResolver
 from pyxis.functions import function
 
 __all__ = [

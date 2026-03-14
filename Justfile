@@ -12,11 +12,11 @@ sync:
 
 # run code formatter
 format *args:
-    uv run ruff format {{ args }} ./src/ ./tests/
+    uv run isort ./src/ ./tests/ {{ args }}
 
 # run code style checks
 check *args:
-    uv run ruff check --config ../ruff.toml {{ args }} ./src/ ./tests/
+    uv run pylint ./src/ ./tests/ --rcfile=.pylintrc {{ args }}
 
 # run unit tests
 test *args:
