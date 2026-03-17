@@ -2,27 +2,25 @@ from __future__ import annotations
 
 from typing import Any, Callable, Generic, Optional, TypeVar, overload
 
-__all__ = [
-    'Option'
-]
+from pyxis.functions import require_not_none
 
-from .functions import require_not_none
+__all__ = ['Option']
 
-T = TypeVar('T')
+T_co = TypeVar('T_co', covariant=True)
 U = TypeVar('U')
 
 
-class Option(Generic[T]):
+class Option(Generic[T_co]):
     """
     A container object which may or may not contain a non-none value. If a value is present, is_present() returns True.
     If no value is present, the object is considered empty and is_present() returns False.
     """
 
-    def __init__(self, value: T) -> None:
+    def __init__(self, value: T_co) -> None:
         self.__value = value
 
     @staticmethod
-    def empty() -> Option[T]:
+    def empty() -> Option[Any]:
         """
         Returns an empty Option instance. No value is present for this Option.
 
@@ -31,7 +29,7 @@ class Option(Generic[T]):
 
         return _Empty()
 
-    def filter(self, predicate: Callable[[T], bool]) -> Option[T]:
+    def filter(self, predicate: Callable[[T_co], bool]) -> Option[T_co]:
         """
         If a value is present, and the value matches the given predicate, returns an Option describing the value,
         otherwise returns an empty Option.
@@ -48,10 +46,10 @@ class Option(Generic[T]):
 
         if predicate(self.__value):
             return self
-        else:
-            return self.empty()
 
-    def flat_map(self, mapper: Callable[[T], Option[U]]) -> Option[U]:
+        return self.empty()
+
+    def flat_map(self, mapper: Callable[[T_co], Option[U]]) -> Option[U]:
         """
         If a value is present, returns the result of applying the given Option-bearing mapping function to the value,
         otherwise returns an empty Option.
@@ -67,7 +65,7 @@ class Option(Generic[T]):
 
         return mapper(self.__value)
 
-    def get(self) -> T:
+    def get(self) -> T_co:
         """
         If a value is present, returns the value, otherwise raise ValueError
 
@@ -80,7 +78,7 @@ class Option(Generic[T]):
 
         return self.__value
 
-    def if_present(self, action: Callable[[T], None]) -> None:
+    def if_present(self, action: Callable[[T_co], None]) -> None:
         """
         If a value is present, performs the given action with the value, otherwise does nothing.
 
@@ -92,7 +90,7 @@ class Option(Generic[T]):
         if self.is_present():
             action(self.__value)
 
-    def if_present_or_else(self, action: Callable[[T], None], empty_action: Callable[[], None]) -> None:
+    def if_present_or_else(self, action: Callable[[T_co], None], empty_action: Callable[[], None]) -> None:
         """
         If a value is present, performs the given action with the value, otherwise performs the given empty-based action
 
@@ -126,7 +124,7 @@ class Option(Generic[T]):
 
         return self.__value is not None
 
-    def map(self, mapper: Callable[[T], U]) -> Option[U]:
+    def map(self, mapper: Callable[[T_co], U]) -> Option[U]:
         """
         If a value is present, returns an Option describing the result of applying the given mapping function
         to the value, otherwise returns an empty Option. If the mapping function returns a None result then
@@ -145,10 +143,16 @@ class Option(Generic[T]):
         return Option.of_nullable(mapper(self.__value))
 
     @overload
-    def try_map(self, mapper: Callable[[T], U]) -> Option[U]:
+    def try_map(self, mapper: Callable[[T_co], U]) -> Option[U]:
         ...
 
-    def try_map(self, mapper: Callable[[T], U], error_handler: Optional[Callable[[Exception], U]] = None) -> Option[U]:
+    @overload
+    def try_map(self, mapper: Callable[[T_co], U], error_handler: Callable[[Exception], U]) -> Option[U]:
+        ...
+
+    def try_map(
+        self, mapper: Callable[[T_co], U], error_handler: Optional[Callable[[Exception], U]] = None
+    ) -> Option[U]:
         """
         If a value is present, returns an Option describing the result of applying the given mapping function
         to the value, catching any exceptions that occur. If no value is present, returns an empty Option.
@@ -166,13 +170,13 @@ class Option(Generic[T]):
 
         try:
             return Option.of_nullable(mapper(self.__value))
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # noqa: BLE001
             if error_handler is not None:
                 return Option.of_nullable(error_handler(e))
             return Option.empty()
 
     @staticmethod
-    def of(value: T) -> Option[T]:
+    def of(value: T_co) -> Option[T_co]:
         """
         Returns an Option describing the given non-none value.
 
@@ -183,7 +187,7 @@ class Option(Generic[T]):
         return Option(require_not_none(value))
 
     @staticmethod
-    def of_nullable(value: T) -> Option[T]:
+    def of_nullable(value: T_co) -> Option[T_co]:
         """
         Returns an Option describing the given value, if non-none, otherwise returns an empty Option.
 
@@ -193,11 +197,11 @@ class Option(Generic[T]):
 
         if value is None:
             return Option.empty()
-        else:
-            return Option(value)
+
+        return Option(value)
 
     @staticmethod
-    def try_of(supplier: Callable[[], T]) -> Option[T]:
+    def try_of(supplier: Callable[[], T_co]) -> Option[T_co]:
         """
         Returns an Option describing the result of invoking a specified supplier, if non-none, otherwise
         returns an empty Option.
@@ -210,10 +214,10 @@ class Option(Generic[T]):
 
         try:
             return Option.of_nullable(supplier())
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # noqa: BLE001
             return Option.empty()
 
-    def __or__(self, other: Option[T]) -> Option[T]:
+    def __or__(self, other: Option[T_co]) -> Option[T_co]:
         """
         If a value is present, returns an Option describing the value, otherwise returns other an Option.
 
@@ -224,10 +228,10 @@ class Option(Generic[T]):
 
         if self.is_present():
             return self
-        else:
-            return other
 
-    def or_else(self, other: T) -> T:
+        return other
+
+    def or_else(self, other: T_co) -> T_co:
         """
         If a value is present, returns the value, otherwise returns other.
 
@@ -237,10 +241,10 @@ class Option(Generic[T]):
 
         if self.is_present():
             return self.__value
-        else:
-            return other
 
-    def or_else_get(self, supplier: Callable[[], T]) -> T:
+        return other
+
+    def or_else_get(self, supplier: Callable[[], T_co]) -> T_co:
         """
         If a value is present, returns the value, otherwise returns the result produced by the supplying function.
 
@@ -252,20 +256,18 @@ class Option(Generic[T]):
 
         if self.is_present():
             return self.__value
-        else:
-            return supplier()
+
+        return supplier()
 
     @overload
-    def or_else_raise(self) -> T:
+    def or_else_raise(self) -> T_co:
         ...
 
     @overload
-    def or_else_raise(self, supplier: Callable[[Any], Exception], *args, **kwargs) -> T:
+    def or_else_raise(self, supplier: Callable[[Any], Exception], *args, **kwargs) -> T_co:
         ...
 
-    def or_else_raise(  # pylint: disable=keyword-arg-before-vararg
-            self, supplier: Callable[[Any], Exception] = None, *args, **kwargs
-    ) -> T:
+    def or_else_raise(self, supplier: Optional[Callable[[Any], Exception]] = None, *args, **kwargs) -> T_co:
         """
         If a value is present, returns the value, otherwise raises an exception produced by the exception
         supplying function.
@@ -286,25 +288,28 @@ class Option(Generic[T]):
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Option):
-            return self.__value == other.__value  # pylint: disable=protected-access
+            return self.__value == other.__value
         return False
 
     def __hash__(self):
         return hash(self.__value)
 
     def __repr__(self):
-        return f'Option({repr(self.__value)})'
+        return f'Option({self.__value!r})'
 
 
-class _Empty(Option):
-    """ Common instance of Option for empty value """
+class _Empty(Option[None]):
+    """Common instance of Option for empty value"""
 
     __instance = None
 
     def __new__(cls, *args, **kwargs):
         if cls.__instance is None:
-            cls.__instance = Option(None)
+            cls.__instance = super().__new__(cls)
         return cls.__instance
+
+    def __init__(self):
+        super().__init__(None)
 
     def is_empty(self) -> bool:
         return True

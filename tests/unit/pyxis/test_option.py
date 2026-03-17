@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from pyxis.option import Option, _Empty
+from pyxis.option import Option, _Empty  # noqa: PLC2701
 
 
 def test_empty():
