@@ -56,6 +56,9 @@ ignore = [
 "**/conftest.py" = [
     "INP001", # implicit-namespace-package
 ]
+"src/pyxis/resources.py" = [
+    "PTH", # flake8-use-pathlib
+]
 
 [lint.isort]
 combine-as-imports = true

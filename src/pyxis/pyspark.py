@@ -249,7 +249,7 @@ class LocalTestSpark(Spark):
 
         rdd = self \
             .spark_context \
-            .wholeTextFiles(resources.resource(root, path), 1) \
+            .wholeTextFiles(resources.absolute(root, path), 1) \
             .map(itemgetter(1))
 
         df = self \
@@ -264,7 +264,7 @@ class LocalTestSpark(Spark):
             return df
 
         formatted_json = json.dumps(df.collectToJSON(), indent=2)
-        with open(resources.resource(root, path), 'w', encoding='utf-8') as f:
+        with open(resources.absolute(root, path), 'w', encoding='utf-8') as f:
             f.write(formatted_json + '\n')
 
         return df
