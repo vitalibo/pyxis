@@ -40,6 +40,8 @@ ignore = [
     "TRY201", # verbose-raise
     "TRY301", # raise-within-try
     "PLR0904", # too-many-public-methods
+    "UP006", # non-pep585-annotation
+    "UP035", # deprecated-import
 ]
 
 [lint.per-file-ignores]
