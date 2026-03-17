@@ -16,7 +16,7 @@ format *args:
 
 # run code style checks
 check *args:
-    uv run pylint ./src/ ./tests/ --rcfile=.pylintrc {{ args }}
+    uv run ruff check --config ruff.toml {{ args }} ./src/ ./tests/
 
 # run unit tests
 test *args:
