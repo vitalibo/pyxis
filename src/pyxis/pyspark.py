@@ -4,7 +4,7 @@ import abc
 import json
 import os
 from operator import itemgetter
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from pyspark import SparkConf, SparkContext
 from pyspark.sql import Column, DataFrame, SparkSession
@@ -12,13 +12,7 @@ from pyspark.sql.types import StructType
 
 from pyxis import resources
 
-__all__ = [
-    'Job',
-    'Source',
-    'Sink',
-    'Spark',
-    'LocalTestSpark'
-]
+__all__ = ['Job', 'LocalTestSpark', 'Sink', 'Source', 'Spark']
 
 
 class Job(abc.ABC):
@@ -65,7 +59,7 @@ class Sink(abc.ABC):
         """
 
 
-class Spark(abc.ABC):
+class Spark(abc.ABC):  # noqa: B024
     """
     Represents an Apache Spark instance.
     """
@@ -171,7 +165,7 @@ class Spark(abc.ABC):
 
         return self.executor_instances * self.executor_cores
 
-    def __enter__(self) -> Spark:
+    def __enter__(self) -> Spark:  # noqa: PYI034
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
@@ -185,8 +179,8 @@ class LocalTestSpark(Spark):
     """
 
     @classmethod
-    def create_source_from_resource(  # pylint: disable=keyword-arg-before-vararg
-            cls, root: str, path: str, schema_path: str = None, *args, **kwargs
+    def create_source_from_resource(
+        cls, root: str, path: str, schema_path: Optional[str] = None, *args, **kwargs
     ) -> Source:
         """
         Creates a :class:`pyboost.pyspark.Source` instance from the given resource.
@@ -201,14 +195,13 @@ class LocalTestSpark(Spark):
 
         class _TestSource(Source):
             def extract(self, spark: LocalTestSpark, *_args, **_kwargs) -> DataFrame:
-                return spark.create_dataframe_from_resource(
-                    root, path, schema_path, *_args, *args, **_kwargs, **kwargs)
+                return spark.create_dataframe_from_resource(root, path, schema_path, *_args, *args, **_kwargs, **kwargs)
 
         return _TestSource()
 
     @classmethod
-    def create_sink_from_resource(  # pylint: disable=keyword-arg-before-vararg
-            cls, root: str, path: str, schema_path: str = None, *args, **kwargs
+    def create_sink_from_resource(
+        cls, root: str, path: str, schema_path: Optional[str] = None, *args, **kwargs
     ) -> Sink:
         """
         Creates a :class:`pyboost.pyspark.Sink` instance from the given resource.
@@ -224,16 +217,17 @@ class LocalTestSpark(Spark):
         class _TestSink(Sink):
             def load(self, spark: LocalTestSpark, df: DataFrame, *_args, **_kwargs) -> None:
                 expected = spark.create_dataframe_from_resource(
-                    root, path, schema_path, *_args, *args, **_kwargs, **kwargs)
+                    root, path, schema_path, *_args, *args, **_kwargs, **kwargs
+                )
                 local_kwargs = {}
-                if 'strict_schema' in kwargs and kwargs['strict_schema']:
+                if kwargs.get('strict_schema'):
                     local_kwargs['schema'] = StructType.from_json(resources.load_json(root, schema_path))
                 cls.assert_dataframe_equals(df, expected, *_args, *args, **_kwargs, **kwargs, **local_kwargs)
 
         return _TestSink()
 
-    def create_dataframe_from_resource(  # pylint: disable=keyword-arg-before-vararg
-            self, root: str, path: str, schema_path: str = None, *args, **kwargs
+    def create_dataframe_from_resource(
+        self, root: str, path: str, schema_path: Optional[str] = None, *args, **kwargs
     ) -> DataFrame:
         """
         Creates a :class:`pyspark.sql.DataFrame` instance from the given resource.
@@ -258,21 +252,21 @@ class LocalTestSpark(Spark):
             .schema(StructType.from_json(resources.load_json(root, schema_path))) \
             .json(rdd)
 
-        # reformat json to make it more readable
-        # WARNING: this code overrides the original json file
-        if os.environ.get('PYBOOST_PYSPARK_REFORMAT_JSON', '').lower() not in ['true', '1']:
+        # Reformat JSON to make it more readable
+        # WARNING: this code overrides the original JSON file
+        if os.environ.get('PYBOOST_PYSPARK_REFORMAT_JSON', '').lower() not in {'true', '1'}:
             return df
 
         formatted_json = json.dumps(df.collectToJSON(), indent=2)
-        with open(resources.absolute(root, path), 'w', encoding='utf-8') as f:
+        with open(resources.absolute(root, path), 'w', encoding='utf-8') as f:  # noqa: FURB103
             f.write(formatted_json + '\n')
 
         return df
 
     @staticmethod
     def assert_dataframe_equals(
-            actual: DataFrame, expected: DataFrame, *args, ignore_schema: bool = False, order_by: List[str] = None,
-            schema: StructType = None, **kwargs
+        actual: DataFrame, expected: DataFrame, *args, ignore_schema: bool = False,
+        order_by: Optional[List[str]] = None, schema: StructType = None, **kwargs
     ) -> None:
         """
         Asserts that two :class:`pyspark.sql.DataFrame` instances are equal.
@@ -288,9 +282,9 @@ class LocalTestSpark(Spark):
             actual = actual.orderBy(*order_by)
 
         if not ignore_schema:
-            assert actual.schema == (schema or expected.schema)
+            assert actual.schema == (schema or expected.schema)  # noqa: S101
 
-        assert actual.collectToJSON() == expected.collectToJSON()
+        assert actual.collectToJSON() == expected.collectToJSON()  # noqa: S101
 
 
 def __get_num_partitions(self: DataFrame) -> int:
@@ -306,7 +300,7 @@ def __get_name(self: Column) -> str:
     :return: Name of the column.
     """
 
-    return self._jc.toString()  # noqa pylint: disable=protected-access
+    return self._jc.toString()
 
 
 def __json_as_struct_type(schema: Dict[str, Any]) -> StructType:

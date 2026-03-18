@@ -13,7 +13,7 @@ exclude = [
 ]
 
 [lint]
-dummy-variable-rgx = "^(_|ignored|unused)$"
+dummy-variable-rgx = "^(_|ignored|unused|args|kwargs)$"
 preview = true
 future-annotations = true
 select = ["ALL"]

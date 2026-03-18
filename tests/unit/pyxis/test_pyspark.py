@@ -127,8 +127,10 @@ def test_total_cores():
     actual = spark.total_cores
 
     assert actual == 6
-    assert mock_spark_conf.get.call_args_list == \
-           [mock.call('spark.executor.instances', '1'), mock.call('spark.executor.cores', '1')]
+    assert mock_spark_conf.get.call_args_list == [
+        mock.call('spark.executor.instances', '1'),
+        mock.call('spark.executor.cores', '1'),
+    ]
 
 
 def test_stop_spark_context():
@@ -143,7 +145,7 @@ def test_stop_spark_context():
     mock_spark_context.stop.assert_called_once()
 
 
-def test_column_get_name(spark):  # pylint: disable=unused-argument
+def test_column_get_name(spark):  # noqa: ARG001
     column = fn.col('col1')
 
     actual = column.getName()
@@ -160,7 +162,7 @@ def test_dataframe_get_num_partitions(spark):
 
 
 def test_struct_type_from_json():
-    schema = { # @formatter:off
+    schema = {  # @formatter:off
         'fields': [
             {'name': 'col1', 'type': 'byte', 'nullable': False, 'metadata': {'foo': 'bar'}},
             {'name': 'col2', 'type': 'short'},
@@ -173,9 +175,9 @@ def test_struct_type_from_json():
             {'name': 'col9', 'type': 'timestamp'},
             {'name': 'col10', 'type': 'date'},
             {'name': 'col11', 'type': {'containsNull': False, 'elementType': 'string', 'type': 'array'}},
-            {'name': 'col12', 'type': {'fields': [{'name': 'f1', 'type': 'string'}, {'name': 'f2', 'type': 'integer'}], 'type': 'struct'}},  # pylint: disable=line-too-long
-            {'name': 'col13', 'type': {'type': 'map', 'keyType': 'string', 'valueType': 'integer', 'valueContainsNull': True}},  # pylint: disable=line-too-long
-            {'name': 'col14', 'type': {'type': 'map', 'keyType': 'string', 'valueType': {'fields': [{'name': 'f1', 'type': 'string'}, {'name': 'f2', 'type': 'integer'}], 'type': 'struct'}, 'valueContainsNull': True}}  # pylint: disable=line-too-long
+            {'name': 'col12', 'type': {'fields': [{'name': 'f1', 'type': 'string'}, {'name': 'f2', 'type': 'integer'}], 'type': 'struct'}},  # noqa: E501
+            {'name': 'col13', 'type': {'type': 'map', 'keyType': 'string', 'valueType': 'integer', 'valueContainsNull': True}},  # noqa: E501
+            {'name': 'col14', 'type': {'type': 'map', 'keyType': 'string', 'valueType': {'fields': [{'name': 'f1', 'type': 'string'}, {'name': 'f2', 'type': 'integer'}], 'type': 'struct'}, 'valueContainsNull': True}}  # noqa: E501
         ],
         'type': 'struct'
     }  # @formatter:on
@@ -213,15 +215,8 @@ def spark_fixture():
         yield spark
 
 
-class SampleJob(Job):  # pylint: disable=missing-class-docstring
-
-    def __init__(
-            self,
-            people_source: Source,
-            department_source: Source,
-            wage_sink: Sink,
-            threshold: int
-    ) -> None:
+class SampleJob(Job):
+    def __init__(self, people_source: Source, department_source: Source, wage_sink: Sink, threshold: int) -> None:
         self.people_source = people_source
         self.department_source = department_source
         self.wage_sink = wage_sink
@@ -260,15 +255,18 @@ def test_sample_job(case, spark):
         spark.create_source_from_resource(
             __file__,
             f'data/pyspark/{case}/people_source.json',
-            'data/pyspark/people_schema.json'),
+            'data/pyspark/people_schema.json',
+        ),
         spark.create_source_from_resource(
             __file__,
             f'data/pyspark/{case}/department_source.json',
-            'data/pyspark//department_schema.json'),
+            'data/pyspark//department_schema.json',
+        ),
         spark.create_sink_from_resource(
             __file__,
             f'data/pyspark/{case}/wage_sink.json',
-            'data/pyspark/wage_schema.json'),
+            'data/pyspark/wage_schema.json',
+        ),
         20)
 
     spark.submit(job)
