@@ -1,6 +1,6 @@
 [project]
 name = "vitalibo.pyxis"
-version = "0.2.11"
+version = "0.2.12"
 description = "An essential Python toolkit for peak productivity"
 authors = [
     { name = "Vitaliy Boyarsky", email = "boyarsky.vitaliy@live.com" },

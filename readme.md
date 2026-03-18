@@ -10,13 +10,13 @@ to tackle complex challenges efficiently.
 ### Installation
 
 ```bash
-pip install vitalibo.pyxis==0.2.11
+pip install vitalibo.pyxis==0.2.12
 ```
 
 or install from GitHub:
 
 ```bash
-pip install 'git+https://github.com/vitalibo/pyxis.git@0.2.11'
+pip install 'git+https://github.com/vitalibo/pyxis.git@0.2.12'
 ```
 
 ### Usage
