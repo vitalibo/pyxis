@@ -19,15 +19,13 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
-    overload
+    overload,
 )
 
 from .functions import identity, require_not_none
 from .option import Option
 
-__all__ = [
-    'Stream'
-]
+__all__ = ['Stream']
 
 T = TypeVar('T')
 T_co = TypeVar('T_co', covariant=True)
@@ -37,8 +35,7 @@ V = TypeVar('V')
 _not_defined = object()
 
 
-# pylint: disable=too-many-lines
-class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
+class Stream(ABC, Generic[T_co]):
     """
     A sequence of elements supporting sequential and parallel operations.
 
@@ -796,12 +793,12 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
     @overload
     def group_by(
-            self: Stream[T], classifier: Callable[[T], K], downstream: Callable[[T], V]
+        self: Stream[T], classifier: Callable[[T], K], downstream: Callable[[T], V]
     ) -> Stream[Tuple[K, Iterable[V]]]: ...
 
     @abstractmethod
     def group_by(
-            self: Stream[T], classifier: Callable[[T], K], downstream: Callable[[T], V] = identity
+        self: Stream[T], classifier: Callable[[T], K], downstream: Callable[[T], V] = identity
     ) -> Stream[Tuple[K, Iterable[V]]]:
         """
         Returns a Stream consisting grouping elements of this Stream according to a classification function,
@@ -831,7 +828,7 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
     @abstractmethod
     def group_by_key(
-            self: Stream[Tuple[K, V]], downstream: Callable[[V], T] = identity
+        self: Stream[Tuple[K, V]], downstream: Callable[[V], T] = identity
     ) -> Stream[Tuple[K, Iterable[T]]]:
         """
         Returns a Stream consisting grouping elements of this pair Stream according to a key value,
@@ -857,12 +854,12 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
 
     @overload
     def reduce_by_key(
-            self: Stream[Tuple[K, V]], accumulator: Callable[[T, V], T], initial: T
+        self: Stream[Tuple[K, V]], accumulator: Callable[[T, V], T], initial: T
     ) -> Stream[Tuple[K, T]]: ...
 
     @abstractmethod
     def reduce_by_key(
-            self: Stream[Tuple[K, V]], accumulator: Callable[[T, V], T], initial: T = _not_defined
+        self: Stream[Tuple[K, V]], accumulator: Callable[[T, V], T], initial: T = _not_defined
     ) -> Stream[Tuple[K, T]]:
         """
         Returns a Stream consisting key and reduced values of this Stream, using an associative accumulation function.
@@ -883,16 +880,16 @@ class Stream(ABC, Generic[T_co]):  # pylint: disable=too-many-public-methods
         """
 
     @overload
-    def joining(self: Stream[str]) -> str: ...
+    def joining(self: Stream[T]) -> str: ...
 
     @overload
-    def joining(self: Stream[str], delimiter: str) -> str: ...
+    def joining(self: Stream[T], delimiter: str) -> str: ...
 
     @overload
-    def joining(self: Stream[str], delimiter: str, prefix: str, suffix: str) -> str: ...
+    def joining(self: Stream[T], delimiter: str, prefix: str, suffix: str) -> str: ...
 
     @abstractmethod
-    def joining(self: Stream[str], delimiter: str = '', prefix: str = '', suffix: str = '') -> str:
+    def joining(self: Stream[T], delimiter: str = '', prefix: str = '', suffix: str = '') -> str:
         """
         Concatenates the input Stream, separated by the specified delimiter, with the specified prefix and suffix,
         in encounter order.
@@ -940,7 +937,7 @@ class _PipelineStage:
     def __is_consumed(self) -> bool:
         return self.__parent \
             .map(lambda parent: parent.__is_consumed() or self.__consuming_state) \
-            .or_else(self.__consuming_state)  # pylint: disable=protected-access
+            .or_else(self.__consuming_state)  # noqa: SLF001
 
     def __mark_as_consumed(self) -> None:
         if self.__materialized:
@@ -950,8 +947,7 @@ class _PipelineStage:
         self.__parent.if_present(_PipelineStage.__mark_as_consumed)
 
 
-class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-public-methods
-
+class _SequentialStream(Stream[T], _PipelineStage):
     """
     A sequential implementation of Stream
     """
@@ -1040,7 +1036,7 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
         return self.collect(set)
 
     def to_dict(self: Stream[Tuple[K, V]]) -> Dict[K, V]:
-        return self.collect(dict)  # noqa
+        return self.collect(dict)
 
     def reduce(self, accumulator: Callable[[T, T], T], initial: T = _not_defined) -> Union[T, Option[T]]:
         return self.__reduce(require_not_none(accumulator), initial, self)
@@ -1086,23 +1082,21 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
         return self.flat_map(lambda kv: ((kv[0], x) for x in mapper(kv[1])))
 
     def group_by(
-            self: Stream[T], classifier: Callable[[T], K], downstream: Callable[[T], V] = identity
+        self: Stream[T], classifier: Callable[[T], K], downstream: Callable[[T], V] = identity
     ) -> Stream[Tuple[K, Iterable[V]]]:
-        return self \
-            .key_by(require_not_none(classifier)) \
-            .group_by_key(require_not_none(downstream))
+        return self.key_by(require_not_none(classifier)).group_by_key(require_not_none(downstream))
 
     def group_by_key(self, downstream: Callable[[V], T] = identity) -> Stream[Tuple[K, Iterable[T]]]:
-        return self \
-            .__group_by_key(require_not_none(downstream)) \
-            .map_values(tuple)
+        return self.__group_by_key(require_not_none(downstream)).map_values(tuple)
 
     def reduce_by_key(self, accumulator: Callable[[T, V], T], initial: T = _not_defined) -> Stream[Tuple[K, T]]:
         return self.__reduce_by_key(require_not_none(accumulator), initial)
 
     def joining(self: Stream[T], delimiter: str = '', prefix: str = '', suffix: str = '') -> str:
         return ''.join((
-            require_not_none(prefix), require_not_none(delimiter).join(self.map(str)), require_not_none(suffix)
+            require_not_none(prefix, 'prefix'),
+            require_not_none(delimiter, 'delimiter').join(self.map(str)),
+            require_not_none(suffix, 'suffix')
         ))
 
     def __iter__(self):
@@ -1178,7 +1172,7 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
     @staticmethod
     def __skip(n: int, iterable: Iterable[T]):
         try:
-            yield from iterable[(n if n >= 0 else 0):]
+            yield from iterable[max(n, 0):]
         except TypeError:
             iterator = iter(iterable)
             for index, item in enumerate(iterator):
@@ -1230,7 +1224,7 @@ class _SequentialStream(Stream[T], _PipelineStage):  # pylint: disable=too-many-
         def func(iterable: Iterable[V]):
             return functools.reduce(accumulator, iterable, *args)
 
-        args = (initial,) if initial != _not_defined else ()
+        args = (initial,) if initial != _not_defined else ()  # noqa: RUF052
         return self \
             .__group_by_key(identity) \
             .map_values(func)

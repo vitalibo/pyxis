@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import functools
-from typing import Callable, Optional, TypeVar, overload
+from typing import Callable, ClassVar, Optional, TypeVar, overload
 
 __all__ = [
-    'require_not_none',
+    'SingletonMeta',
+    'function',
+    'identity',
     'is_none',
     'not_none',
-    'identity',
-    'function',
-    'unpack',
+    'require_not_none',
     'return_values_as',
-    'SingletonMeta'
+    'unpack',
 ]
 
 T = TypeVar('T')
@@ -33,7 +33,7 @@ def require_not_none(obj: T, msg: Optional[str] = None) -> T:
 
     if obj is None:
         if msg is None:
-            raise ValueError()
+            raise ValueError
         raise ValueError(msg)
     return obj
 
@@ -105,7 +105,7 @@ class SingletonMeta(type):
     >>>    pass
     """
 
-    __instances = {}
+    __instances: ClassVar = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls.__instances:
@@ -113,7 +113,7 @@ class SingletonMeta(type):
         return cls.__instances[cls]
 
 
-class function:  # pylint: disable=invalid-name
+class function:  # noqa: N801
     """
     Represents a function that accepts one or more arguments and produces a result.
     """

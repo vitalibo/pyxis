@@ -3,8 +3,8 @@ from unittest import mock
 from pyxis import resources
 
 
-def test_resource():
-    actual = resources.resource(__file__, 'data/scratch.txt')
+def test_absolute():
+    actual = resources.absolute(__file__, 'data/scratch.txt')
 
     assert actual.endswith('tests/unit/pyxis/data/scratch.txt')
 
@@ -16,7 +16,6 @@ def test_load_text():
         assert actual == 'foo'
         call_args = mock_open.call_args
         assert call_args[0][0].endswith('tests/unit/pyxis/data/scratch.txt')
-        assert call_args[0][1] == 'r'
         assert call_args[1] == {'encoding': 'utf-8'}
 
 

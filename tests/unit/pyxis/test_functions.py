@@ -1,9 +1,10 @@
+import operator
+
 import pytest
 
 from pyxis import functions
 
 
-# pylint: disable=missing-class-docstring
 def test_require_not_none():
     obj = object()
 
@@ -90,7 +91,7 @@ def test_multiple_classes():
 
 
 def test_unpack():
-    unpacked = functions.unpack(lambda x, y: x + y)
+    unpacked = functions.unpack(operator.add)
 
     assert unpacked((1, 2)) == 3
 

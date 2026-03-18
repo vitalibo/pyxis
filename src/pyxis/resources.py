@@ -4,15 +4,14 @@ import os
 from pyxis.functions import require_not_none
 
 
-def resource(root: str, path: str) -> str:
+def absolute(root: str, path: str) -> str:
     """
     Returns an absolute path to a resource.
 
-    >>> absolute_path = resource(__file__, 'foo/bar.txt')
+    >>> absolute_path = absolute(__file__, 'foo/bar.txt')
     """
 
-    return os.path.join(os.path.dirname(
-        require_not_none(root, 'root')), require_not_none(path, 'path'))
+    return os.path.join(os.path.dirname(require_not_none(root, 'root')), require_not_none(path, 'path'))
 
 
 def load_text(root: str, path: str, encoding: str = 'utf-8', **kwargs) -> str:
@@ -22,7 +21,7 @@ def load_text(root: str, path: str, encoding: str = 'utf-8', **kwargs) -> str:
     >>> content = load_text(__file__, 'foo/bar.txt')
     """
 
-    with open(resource(root, path), 'r', encoding=encoding) as f:
+    with open(absolute(root, path), encoding=encoding) as f:
         return f.read()
 
 
@@ -40,7 +39,7 @@ def load_json_as_text(root: str, path: str, **kwargs) -> str:
     """
     Returns a json resource as a json string.
 
-    >>> content:str = load_json_as_text(__file__, 'foo/bar.json')
+    >>> content: str = load_json_as_text(__file__, 'foo/bar.json')
     """
 
     return json.dumps(load_json(root, path, **kwargs), **kwargs)
@@ -53,7 +52,7 @@ def load_yaml(root: str, path: str, **kwargs):
     >>> content = load_yaml(__file__, 'foo/bar.yaml')
     """
 
-    import yaml  # pylint: disable=import-outside-toplevel
+    import yaml  # noqa: PLC0415
 
     return yaml.safe_load(load_text(root, path, **kwargs))
 
@@ -65,6 +64,6 @@ def load_yaml_all(root: str, path: str, **kwargs):
     >>> content = load_yaml_all(__file__, 'foo/bar.yaml')
     """
 
-    import yaml  # pylint: disable=import-outside-toplevel
+    import yaml  # noqa: PLC0415
 
     return list(yaml.safe_load_all(load_text(root, path, **kwargs)))

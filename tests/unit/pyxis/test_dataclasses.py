@@ -7,7 +7,6 @@ import pytest
 from pyxis.dataclasses import dataclass, reference
 
 
-# pylint: disable=missing-class-docstring
 def test_field_reference():
     @reference
     @dataclasses.dataclass
@@ -63,7 +62,7 @@ def test_dataclass_pydantic():
     user = User('foo', 'bar')
 
     with pytest.raises(ValueError, match='age'):
-        user.__pydantic_validate_values__()  # pylint: disable=no-member
+        user.__pydantic_validate_values__()
 
 
 @mock.patch('pydantic.dataclasses')
@@ -78,4 +77,4 @@ def test_dataclass_no_pydantic(mock_dataclasses):
     user = User('foo', 'bar')
 
     with pytest.raises(AttributeError, match="'User' object has no attribute '__pydantic_validate_values__'"):
-        user.__pydantic_validate_values__()  # pylint: disable=no-member
+        user.__pydantic_validate_values__()

@@ -26,33 +26,27 @@ def test_s3_config_reader_test():
     assert S3ConfigReader.test('foo://bucket/key') is False
 
 
-@pytest.mark.parametrize('value, expected', [
+@pytest.mark.parametrize(
+    ('value', 'expected'),
     [
-        '{{resolve:secretsmanager:MySecret}}',
-        {'host': 'localhost', 'port': 5432, 'creds': {'username': 'foo', 'password': 'bar'}}
-    ], [
-        '{{resolve:secretsmanager:MySecret:SecretString:host}}',
-        'localhost'
-    ], [
-        '{{resolve:secretsmanager:MySecret:SecretString:port}}',
-        5432
-    ], [
-        '{{resolve:secretsmanager:MySecret:SecretString:creds}}',
-        {'username': 'foo', 'password': 'bar'}
-    ], [
-        '{{resolve:secretsmanager:MySecret:SecretString:creds.username}}',
-        'foo'
-    ], [
-        '{{resolve:secretsmanager:MySecret:SecretString:creds.password}}',
-        'bar'
-    ]
-])
+        (
+            '{{resolve:secretsmanager:MySecret}}',
+            {'host': 'localhost', 'port': 5432, 'creds': {'username': 'foo', 'password': 'bar'}},
+        ),
+        ('{{resolve:secretsmanager:MySecret:SecretString:host}}', 'localhost'),
+        ('{{resolve:secretsmanager:MySecret:SecretString:port}}', 5432),
+        ('{{resolve:secretsmanager:MySecret:SecretString:creds}}', {'username': 'foo', 'password': 'bar'}),
+        ('{{resolve:secretsmanager:MySecret:SecretString:creds.username}}', 'foo'),
+        ('{{resolve:secretsmanager:MySecret:SecretString:creds.password}}', 'bar'),
+    ],
+)
 @mock.patch('boto3.client')
 def test_secrets_manager_resolver_secret_id(mock_boto3, value, expected):
     mock_secretsmanager = mock.Mock()
     mock_boto3.return_value = mock_secretsmanager
-    mock_secretsmanager.get_secret_value.return_value = \
-        {'SecretString': '{"host": "localhost", "port": 5432, "creds": {"username": "foo", "password": "bar"}}'}
+    mock_secretsmanager.get_secret_value.return_value = {
+        'SecretString': '{"host": "localhost", "port": 5432, "creds": {"username": "foo", "password": "bar"}}'
+    }
     resolver = SecretsManagerResolver()
 
     actual = resolver.resolve(Config({}), 'myKey', value)
@@ -61,54 +55,62 @@ def test_secrets_manager_resolver_secret_id(mock_boto3, value, expected):
     mock_secretsmanager.get_secret_value.assert_called_once_with(SecretId='MySecret')
 
 
-@pytest.mark.parametrize('value, expected', [
+@pytest.mark.parametrize(
+    ('value', 'expected'),
     [
-        '{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123}}',
-        {'host': 'localhost', 'port': 5432, 'creds': {'username': 'foo', 'password': 'bar'}}
-    ], [
-        ('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123'
-         ':SecretString:host}}'),
-        'localhost'
-    ], [
-        ('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123'
-         ':SecretString:port}}'),
-        5432
-    ], [
-        ('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123'
-         ':SecretString:creds}}'),
-        {'username': 'foo', 'password': 'bar'}
-    ], [
-        ('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123'
-         ':SecretString:creds.username}}'),
-        'foo'
-    ], [
-        ('{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123'
-         ':SecretString:creds.password}}'),
-        'bar'
-    ]
-])
+        (
+            '{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123}}',
+            {'host': 'localhost', 'port': 5432, 'creds': {'username': 'foo', 'password': 'bar'}},
+        ),
+        (
+            '{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123:SecretString:host}}',
+            'localhost',
+        ),
+        (
+            '{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123:SecretString:port}}',
+            5432,
+        ),
+        (
+            '{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123:SecretString:creds}}',
+            {'username': 'foo', 'password': 'bar'},
+        ),
+        (
+            '{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123:SecretString:creds.username}}',
+            'foo',
+        ),
+        (
+            '{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123:SecretString:creds.password}}',
+            'bar',
+        ),
+    ],
+)
 @mock.patch('boto3.client')
 def test_secrets_manager_resolver_secret_arn(mock_boto3, value, expected):
     mock_secretsmanager = mock.Mock()
     mock_boto3.return_value = mock_secretsmanager
-    mock_secretsmanager.get_secret_value.return_value = \
-        {'SecretString': '{"host": "localhost", "port": 5432, "creds": {"username": "foo", "password": "bar"}}'}
+    mock_secretsmanager.get_secret_value.return_value = {
+        'SecretString': '{"host": "localhost", "port": 5432, "creds": {"username": "foo", "password": "bar"}}'
+    }
     resolver = SecretsManagerResolver()
 
     actual = resolver.resolve(Config({}), 'myKey', value)
 
     assert actual == expected
     mock_secretsmanager.get_secret_value.assert_called_once_with(
-        SecretId='arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123')
+        SecretId='arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123'
+    )
 
 
-@pytest.mark.parametrize('value', [
-    '{{resolve:secretmanager:MySecret}}',
-    '{{resolve:secretsmanager:arn:aws:lambda:us-east-1:12345678910:function:SecretName-ABC123}}',
-    '{{resolve:secretsmanager:::}}',
-    '{{resolve:secretsmanager}}',
-    '{{resolve:secretsmanager:}}'
-])
+@pytest.mark.parametrize(
+    'value',
+    [
+        '{{resolve:secretmanager:MySecret}}',
+        '{{resolve:secretsmanager:arn:aws:lambda:us-east-1:12345678910:function:SecretName-ABC123}}',
+        '{{resolve:secretsmanager:::}}',
+        '{{resolve:secretsmanager}}',
+        '{{resolve:secretsmanager:}}',
+    ],
+)
 @mock.patch('boto3.client')
 def test_secrets_manager_resolver_bad_format(mock_boto3, value):
     mock_secretsmanager = mock.Mock()
@@ -150,13 +152,16 @@ def test_secrets_manager_resolver_secret_arn_with_version(mock_boto3):
     mock_secretsmanager.get_secret_value.return_value = {'SecretString': '{"host": "localhost"}'}
     resolver = SecretsManagerResolver()
 
-    value = '{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:' \
-            'SecretName-ABC123:SecretString:host:1234}}'
+    value = (
+        '{{resolve:secretsmanager:arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123'
+        ':SecretString:host:1234}}'
+    )
     actual = resolver.resolve(Config({}), 'myKey', value)
 
     assert actual == 'localhost'
     mock_secretsmanager.get_secret_value.assert_called_once_with(
-        SecretId='arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123', VersionId='1234')
+        SecretId='arn:aws:secretsmanager:us-east-1:12345678910:secret:SecretName-ABC123', VersionId='1234'
+    )
 
 
 def test_secrets_manager_resolver_test():
@@ -207,12 +212,15 @@ def test_ssm_resolve_with_version(mock_boto3):
     mock_ssm.get_parameter.assert_called_once_with(Name='MyParameter:123')
 
 
-@pytest.mark.parametrize('value', [
-    '{{resolve:foo:MySecret}}',
-    'resolve:ssm-secure:MySecret',
-    '{{resolve:ssm-secure:MySecret:version}}',
-    '{{resolve:ssm-secure:MySecret:version:1:23}}',
-])
+@pytest.mark.parametrize(
+    'value',
+    [
+        '{{resolve:foo:MySecret}}',
+        'resolve:ssm-secure:MySecret',
+        '{{resolve:ssm-secure:MySecret:version}}',
+        '{{resolve:ssm-secure:MySecret:version:1:23}}',
+    ],
+)
 @mock.patch('boto3.client')
 def test_ssm_resolve_bad_format(mock_boto3, value):
     mock_ssm = mock.Mock()
@@ -235,11 +243,7 @@ def test_cloudformation_resolve(mock_boto3):
     mock_cfn = mock.Mock()
     mock_boto3.return_value = mock_cfn
     mock_cfn.describe_stacks.return_value = {
-        'Stacks': [{
-            'Outputs': [
-                {'OutputKey': 'MyOutput', 'OutputValue': 'MyOutput'}
-            ]
-        }]
+        'Stacks': [{'Outputs': [{'OutputKey': 'MyOutput', 'OutputValue': 'MyOutput'}]}]
     }
     resolver = CloudFormationResolver()
 
@@ -264,11 +268,7 @@ def test_cloudformation_resolve_output_not_found(mock_boto3):
     mock_cfn = mock.Mock()
     mock_boto3.return_value = mock_cfn
     mock_cfn.describe_stacks.return_value = {
-        'Stacks': [{
-            'Outputs': [
-                {'OutputKey': 'MyOutput1', 'OutputValue': 'MyOutput'}
-            ]
-        }]
+        'Stacks': [{'Outputs': [{'OutputKey': 'MyOutput1', 'OutputValue': 'MyOutput'}]}]
     }
     resolver = CloudFormationResolver()
     with pytest.raises(ValueError, match='CloudFormation stack "MyStack" does not have output "MyOutput"'):
@@ -280,7 +280,7 @@ def test_cloudformation_resolve_bad_format(mock_boto3):
     mock_cfn = mock.Mock()
     mock_boto3.return_value = mock_cfn
     resolver = CloudFormationResolver()
-    with pytest.raises(ValueError, match='Value .* is not a valid CloudFormation format'):
+    with pytest.raises(ValueError, match=r'Value .* is not a valid CloudFormation format'):
         resolver.resolve(Config({}), 'myKey', '{{resolve:cloudformation:My_Stack:MyOutput}}')
 
 

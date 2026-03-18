@@ -12,21 +12,14 @@ from typing import Any, Dict, List, Optional, TypeVar, overload
 from pyxis.functions import function, require_not_none
 from pyxis.option import Option
 
-__all__ = [
-    'Config',
-    'ConfigFactory',
-    'ConfigException',
-    'ConfigReader',
-    'ConfigParser',
-    'ConfigValueResolver'
-]
+__all__ = ['Config', 'ConfigException', 'ConfigFactory', 'ConfigParser', 'ConfigReader', 'ConfigValueResolver']
 
 T = TypeVar('T')
 
 _DEFAULT = object()
 
 
-class Config:
+class Config:  # noqa: PLW1641
     """
     The Config class is a configuration class that wraps a Python dictionary. It provides several methods for
     accessing and manipulating configuration values. The Config class is immutable and thread-safe.
@@ -53,14 +46,14 @@ class Config:
         """
 
         def traverse(root, nodes):
-            while nodes:  # pylint: disable=too-many-nested-blocks
+            while nodes:  # noqa: PLR1702
                 path = nodes.pop(0)
                 if isinstance(root, Dict) and path in root:
                     root = root.get(path)
                 elif isinstance(root, List) and path.startswith('[') and path.endswith(']'):
                     path = path[1:-1]
                     try:
-                        if re.match(r'^[-0-9]*:[-0-9]*:?[-0-9]*$', path) or path == '':
+                        if re.match(r'^[-0-9]*:[-0-9]*:?[-0-9]*$', path) or not path:
                             # append the ':::' string to the path string before splitting to ensure that
                             # we get at least three parts
                             params = [int(x) if x else None for x in (path + ':::').split(':')[:3]]
@@ -109,7 +102,7 @@ class Config:
                 elif use_dict2:
                     yield key, dict2[key]
 
-        return Config(dict(merge(self.__root, other.__root, fill_missing)))  # pylint: disable=protected-access
+        return Config(dict(merge(self.__root, other.__root, fill_missing)))
 
     def resolve(self) -> Config:
         """
@@ -166,14 +159,14 @@ class Config:
         if not isinstance(other, Config):
             return False
 
-        return self.__root == other.__root  # pylint: disable=protected-access
+        return self.__root == other.__root
 
     def __repr__(self):
         return repr(self.__root)
 
 
 class ConfigFactory:
-    """ Contains static methods to create `Config` objects. """
+    """Contains static methods to create `Config` objects."""
 
     @staticmethod
     def default_load() -> Config:
@@ -184,9 +177,9 @@ class ConfigFactory:
         for extension in ['json', 'yaml', 'ini', 'properties']:
             try:
                 return ConfigFactory.load(f'application.{extension}')
-            except (ConfigException, FileNotFoundError) as e:
+            except (ConfigException, FileNotFoundError) as e:  # noqa: PERF203
                 if isinstance(e, ConfigException) and \
-                        'no reader found' not in str(e) and 'no format parser found' not in str(e):
+                    'no reader found' not in str(e) and 'no format parser found' not in str(e):
                     raise e
 
         config = ConfigFactory.arguments()
@@ -239,11 +232,7 @@ class ConfigFactory:
         Parses the environment variables and returns them as a `Config` object.
         """
 
-        envs = {}
-        for key, value in os.environ.items():
-            envs[key] = value
-
-        return Config({'envs': envs})
+        return Config({'envs': dict(os.environ)})
 
     @staticmethod
     def arguments() -> Config:
@@ -257,7 +246,7 @@ class ConfigFactory:
                 parser.add_argument(var)
         parsed, _ = parser.parse_known_args(sys.argv)
 
-        args = {}
+        args = {}  # noqa: RUF052
         for name, value in vars(parsed).items():
             keys = name.split('.')
             cell = args
@@ -280,8 +269,8 @@ class ConfigFactory:
         return Config({})
 
 
-class ConfigException(Exception):
-    """ Base exception for all configuration related exceptions. """
+class ConfigException(Exception):  # noqa: N818
+    """Base exception for all configuration related exceptions."""
 
 
 class _SubclassRegistryMeta(abc.ABCMeta):
@@ -346,7 +335,7 @@ class LocalFileConfigReader(ConfigReader):
     """
 
     priority = 200
-    test = function(lambda x: True)
+    test = function(lambda _: True)
 
     def read(self, path: str) -> str:
         with open(path, encoding='utf-8') as f:
@@ -361,7 +350,8 @@ class JsonConfigParser(ConfigParser):
     test = function(lambda x: x.endswith('.json'))
 
     def parse(self, content: str) -> dict:
-        import json  # pylint: disable=import-outside-toplevel
+        import json  # noqa: PLC0415
+
         return json.loads(content)
 
 
@@ -373,7 +363,8 @@ class IniConfigParser(ConfigParser):
     test = function(lambda x: x.endswith('.ini'))
 
     def parse(self, content: str) -> dict:
-        import configparser  # pylint: disable=import-outside-toplevel
+        import configparser  # noqa: PLC0415
+
         parser = configparser.ConfigParser()
         parser.read_string(content)
 
@@ -394,10 +385,11 @@ class YamlConfigParser(ConfigParser):
     A configuration parser that uses YAML.
     """
 
-    test = function(lambda x: x.endswith('.yaml') or x.endswith('.yml'))
+    test = function(lambda x: x.endswith(('.yaml', '.yml')))
 
     def parse(self, content: str) -> dict:
-        import yaml  # pylint: disable=import-outside-toplevel
+        import yaml  # noqa: PLC0415
+
         return yaml.safe_load(content)
 
 
@@ -409,7 +401,7 @@ class ConfigValueReferenceResolver(ConfigValueResolver):
     priority = 10
     test = function(lambda x: '${' in x and '}' in x and x.index('${') < x.index('}'))
 
-    def resolve(self, config: Config, key: str, value: str) -> Any:
+    def resolve(self, config: Config, key: str, value: str) -> Any:  # noqa: C901, ARG002
         def parse(string):
             while string:
                 pos = string.find('$')
@@ -420,11 +412,11 @@ class ConfigValueReferenceResolver(ConfigValueResolver):
                     yield string[:pos]
                     string = string[pos:]
 
-                chr = string[1:2]  # noqa pylint: disable=redefined-builtin
-                if chr == '$':
+                char = string[1:2]
+                if char == '$':
                     yield '$'
                     string = string[2:]
-                elif chr == '{':
+                elif char == '{':
                     ref_key = re.compile(r'\$\{([^}]+)}')
                     match = ref_key.match(string)
                     if match is None:
@@ -438,7 +430,7 @@ class ConfigValueReferenceResolver(ConfigValueResolver):
             for path in paths:
                 try:
                     return config.get(path)
-                except ConfigException:
+                except ConfigException:  # noqa: PERF203
                     pass
 
             path, *default = expr.split('?', 1)

@@ -1,8 +1,9 @@
+from enum import Enum
 from functools import lru_cache, total_ordering
 
-__all__ = [
-    'EnumMixin'
-]
+__all__ = ['EnumMixin']
+
+from typing import Type
 
 
 @total_ordering
@@ -24,7 +25,7 @@ class EnumMixin:
     """
 
     @classmethod
-    def value_of(cls, value):  # pylint: disable=inconsistent-return-statements
+    def value_of(cls: Type[Enum], value):
         """
         Returns the enum constant of the specified enum type with the specified value.
 
@@ -35,6 +36,7 @@ class EnumMixin:
         for member in cls.__members__.values():
             if member.value == value:
                 return member
+        return None
 
     @property
     def ordinal(self):
@@ -45,7 +47,7 @@ class EnumMixin:
         :return: the ordinal of this enum constant
         """
 
-        return self.__ordinals__()[self.name]
+        return self.__ordinals()[self.name]  # ty: ignore[unresolved-attribute]
 
     def __gt__(self, other):
         if not isinstance(other, type(self)):
@@ -53,6 +55,6 @@ class EnumMixin:
         return self.ordinal > other.ordinal
 
     @classmethod
-    @lru_cache()
-    def __ordinals__(cls):
+    @lru_cache
+    def __ordinals(cls: Type[Enum]):
         return {name: index for index, name in enumerate(cls.__members__)}

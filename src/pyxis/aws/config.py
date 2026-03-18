@@ -9,12 +9,12 @@ from pyxis.config import Config, ConfigFactory, ConfigReader, ConfigValueResolve
 from pyxis.functions import function
 
 __all__ = [
+    'CloudFormationResolver',
     'Config',
     'ConfigFactory',
     'S3ConfigReader',
     'SecretsManagerResolver',
     'SystemsManagerResolver',
-    'CloudFormationResolver'
 ]
 
 
@@ -57,13 +57,13 @@ class SecretsManagerResolver(ConfigValueResolver):
     def __init__(self):
         self.__sm = boto3.client('secretsmanager')
 
-    def resolve(self, config: Config, key: str, value: str) -> Any:
+    def resolve(self, config: Config, key: str, value: str) -> Any:  # noqa: ARG002
         match = re.match(self.regex, value)
         if match is None:
             raise ValueError(f'Value "{value}" is not a valid Secrets Manager format')
         secret_id, decryption, json_path, version_id = match.groups()
 
-        if secret_id is None or secret_id == '':
+        if secret_id is None or not secret_id:
             raise ValueError('Secret ID is required')
         if decryption is not None and decryption != 'SecretString':
             raise ValueError('SecretString is the only supported decryption type')
@@ -90,21 +90,19 @@ class SystemsManagerResolver(ConfigValueResolver):
     :param version: The version of the parameter.
     """
 
-    test = function(
-        lambda x: (x.startswith('{{resolve:ssm:') or x.startswith('{{resolve:ssm-secure:')) and x.endswith('}}')
-    )
+    test = function(lambda x: x.startswith(('{{resolve:ssm:', '{{resolve:ssm-secure:')) and x.endswith('}}'))
     regex = re.compile(r'{{resolve:ssm(-secure)?:([-a-zA-Z0-9_./]+)(:\d+)?}}')
 
     def __init__(self):
         self.__ssm = boto3.client('ssm')
 
-    def resolve(self, config: Config, key: str, value: str) -> Any:
+    def resolve(self, config: Config, key: str, value: str) -> Any:  # noqa: ARG002
         match = re.match(self.regex, value)
         if match is None:
             raise ValueError(f'Value "{value}" is not a valid SSM format')
         with_decryption, parameter_name, version = match.groups()
 
-        if version is not None and version != '':
+        if version is not None and version:
             parameter_name = parameter_name + version
         params = {'Name': parameter_name}
         if with_decryption is not None:
@@ -131,7 +129,7 @@ class CloudFormationResolver(ConfigValueResolver):
     def __init__(self):
         self.__cfn = boto3.client('cloudformation')
 
-    def resolve(self, config: Config, key: str, value: str) -> Any:
+    def resolve(self, config: Config, key: str, value: str) -> Any:  # noqa: ARG002
         match = re.match(self.regex, value)
         if match is None:
             raise ValueError(f'Value "{value}" is not a valid CloudFormation format')
