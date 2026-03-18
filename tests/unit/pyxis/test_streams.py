@@ -1,3 +1,4 @@
+import operator
 from typing import Dict, Iterator, List, Set
 from unittest import mock
 
@@ -8,10 +9,9 @@ from pyxis.option import Option
 from pyxis.streams import Stream
 
 
-# pylint: disable=too-many-lines
 def test_constructor_raise_type_error():
     with pytest.raises(TypeError):
-        Stream()  # pylint: disable=abstract-class-instantiated
+        Stream()
 
 
 def test_of_iterable():
@@ -244,7 +244,7 @@ def test_reversed():
 
 
 def test_reversed_generator():
-    stream = Stream.of((x for x in (1, 3, 2)))
+    stream = Stream.of(x for x in (1, 3, 2))
 
     actual = stream.reversed()
 
@@ -379,7 +379,7 @@ def test_window_lazy():
     actual = stream.window(3)
 
     assert len(mock_iterable.mock_calls) == 0
-    assert list(actual) == [(1, 2, 3), (4, 5,)]
+    assert list(actual) == [(1, 2, 3), (4, 5)]
     assert len(mock_iterable.mock_calls) == 6
     assert is_consumed(actual)
     assert is_consumed(stream)
@@ -434,7 +434,7 @@ def test_limit():
 
 
 def test_limit_generator():
-    stream = Stream.of((x for x in (1, 2, 3, 4, 5)))
+    stream = Stream.of(x for x in (1, 2, 3, 4, 5))
 
     actual = stream.limit(3)
 
@@ -504,7 +504,7 @@ def test_skip():
 
 
 def test_skip_generator():
-    stream = Stream.of((x for x in (1, 2, 3, 4, 5)))
+    stream = Stream.of(x for x in (1, 2, 3, 4, 5))
 
     actual = stream.skip(3)
 
@@ -520,7 +520,7 @@ def test_skip_more():
 
 
 def test_skip_more_generator():
-    stream = Stream.of((x for x in (1, 2, 3,)))
+    stream = Stream.of(x for x in (1, 2, 3))
 
     actual = stream.skip(5)
 
@@ -852,7 +852,7 @@ def test_to_dict():
 def test_reduce():
     stream = Stream.of(1, 2, 3)
 
-    actual = stream.reduce(lambda a, x: a + x)
+    actual = stream.reduce(operator.add)
 
     assert isinstance(actual, Option)
     assert actual.is_present()
@@ -862,7 +862,7 @@ def test_reduce():
 def test_reduce_empty():
     stream = Stream.of()
 
-    actual = stream.reduce(lambda a, x: a + x)
+    actual = stream.reduce(operator.add)
 
     assert isinstance(actual, Option)
     assert actual.is_empty()
@@ -871,7 +871,7 @@ def test_reduce_empty():
 def test_reduce_initial():
     stream = Stream.of(1, 2, 3)
 
-    actual = stream.reduce(lambda a, x: a + x, 10)
+    actual = stream.reduce(operator.add, 10)
 
     assert not isinstance(actual, Option)
     assert actual == 16
@@ -880,7 +880,7 @@ def test_reduce_initial():
 def test_reduce_initial_empty():
     stream = Stream.of()
 
-    actual = stream.reduce(lambda a, x: a + x, 10)
+    actual = stream.reduce(operator.add, 10)
 
     assert not isinstance(actual, Option)
     assert actual == 10
@@ -904,8 +904,7 @@ def test_reduce_lazy():
 
 
 def test_min():
-    stream = Stream.of(3, 1, 2) \
-        .map(identity)
+    stream = Stream.of(3, 1, 2).map(identity)
 
     actual = stream.min()
 
@@ -970,8 +969,7 @@ def test_max_empty():
 
 
 def test_max_comparator():
-    stream = Stream.of('aaa', 'c', 'bb') \
-        .map(identity)
+    stream = Stream.of('aaa', 'c', 'bb').map(identity)
 
     actual = stream.max(len)
 
@@ -1371,7 +1369,7 @@ def test_group_by_empty():
 def test_group_by_downstream():
     stream = Stream.of('aa', 'ccc', 'bb')
 
-    actual = stream.group_by(len, downstream=str.upper)
+    actual = stream.group_by(len, downstream=lambda x: x.upper())
 
     assert list(actual) == [(2, ('AA', 'BB')), (3, ('CCC',))]
 
@@ -1434,7 +1432,7 @@ def test_group_by_key_lazy():
 def test_reduce_by_key():
     stream = Stream.of(('a', 1), ('b', 2), ('a', 3))
 
-    actual = stream.reduce_by_key(lambda x, y: x + y)
+    actual = stream.reduce_by_key(operator.add)
 
     assert list(actual) == [('a', 4), ('b', 2)]
 
@@ -1480,7 +1478,7 @@ def test_joining_empty():
     actual = stream.joining()
 
     assert isinstance(actual, str)
-    assert actual == ''
+    assert actual == ''  # noqa: PLC1901
 
 
 def test_joining_delimiter():
@@ -1601,13 +1599,12 @@ def test_pipeline_children_deep_consumed_lazy():
 
 def is_consumed(stream: Stream) -> bool:
     with pytest.raises(ValueError) as e:
-        # pylint: disable=singleton-comparison
-        assert list(stream) == False  # show what return
+        assert not list(stream)  # show what return
     return str(e.value) == 'stream has already been operated upon or closed'
 
 
 class IterableMock(mock.Mock):
-    """ IterableMock is a subclass of Mock with iterable implementation """
+    """IterableMock is a subclass of Mock with iterable implementation"""
 
     def __iter__(self):
         def func():
