@@ -21,7 +21,7 @@ def load_text(root: str, path: str, encoding: str = 'utf-8', **kwargs) -> str:
     >>> content = load_text(__file__, 'foo/bar.txt')
     """
 
-    with open(absolute(root, path), encoding=encoding) as f:  # noqa: FURB101
+    with open(absolute(root, path), encoding=encoding) as f:
         return f.read()
 
 
