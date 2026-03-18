@@ -42,6 +42,8 @@ ignore = [
     "PLR0904", # too-many-public-methods
     "UP006", # non-pep585-annotation
     "UP035", # deprecated-import
+    "PTH", # flake8-use-pathlib
+    "FURB101", # read-whole-file
 ]
 
 [lint.per-file-ignores]
@@ -55,9 +57,6 @@ ignore = [
 ]
 "**/conftest.py" = [
     "INP001", # implicit-namespace-package
-]
-"src/pyxis/resources.py" = [
-    "PTH", # flake8-use-pathlib
 ]
 
 [lint.isort]

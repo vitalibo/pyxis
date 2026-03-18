@@ -282,11 +282,11 @@ def samples_config_with_fallback():
         ({'a': 123}, {'a': ['aa']}, {'a': 123}),
         ({'a': ['aa']}, {'a': 123}, {'a': ['aa']}),
         ({'a': {'foo': 123}}, {'a': ['aa']}, {'a': {'foo': 123}}),
-        ({'foo': None}, {'foo': 123}, {'foo': None})
+        ({'foo': None}, {'foo': 123}, {'foo': None}),
     ]
 
 
-@pytest.mark.parametrize('config1, config2, expected', samples_config_with_fallback())
+@pytest.mark.parametrize(('config1', 'config2', 'expected'), samples_config_with_fallback())
 def test_config_with_fallback(config1, config2, expected):
     config1, config2 = Config(config1), Config(config2)
 
@@ -322,7 +322,7 @@ def test_config_iter():
         'foo.tar[3][0]',
         'foo.tar[3][0].taz',
         'foo.tar[3][1]',
-        'foo.tar[3][1].taz'
+        'foo.tar[3][1].taz',
     ]
 
 
@@ -443,7 +443,7 @@ def samples_config_resolve():
     ]
 
 
-@pytest.mark.parametrize('config, expected', samples_config_resolve())
+@pytest.mark.parametrize(('config', 'expected'), samples_config_resolve())
 def test_config_resolve(config, expected):
     config = Config(config)
 
@@ -460,7 +460,7 @@ def samples_config_resolve_with_missing():
         {'exp': '${foo[0].bar}'},
         {'exp': '${foo|bar}'},
         {'exp': '${foo|bar|baz}'},
-        {'exp': '${foo[0]|bar[0]}'}
+        {'exp': '${foo[0]|bar[0]}'},
     ]
 
 
@@ -480,10 +480,10 @@ def test_config_resolve_with_loop():
 
 
 def test_config_resolve_call_resolver():
-    class TestResolver(ConfigValueResolver):  # pylint: disable=missing-class-docstring,unused-variable
+    class TestResolver(ConfigValueResolver):
         test = function(lambda x: x.startswith('test'))
 
-        def resolve(self, _config: Config, key: str, value: str) -> Any:
+        def resolve(self, _config: Config, key: str, value: str) -> Any:  # noqa: ARG002
             method_mock = mock.Mock()
             method_mock(key, value)
             return method_mock
@@ -512,67 +512,30 @@ def test_config_factory_system_environments():
 
 def samples_config_factory_arguments():
     return [
-        (
-            ['--foo', '123'],
-            {'args': {'foo': 123}}
-        ), (
-            ['--foo', '"123"'],
-            {'args': {'foo': '123'}}
-        ), (
-            ['--foo.bar', '123'],
-            {'args': {'foo': {'bar': 123}}}
-        ), (
-            ['--foo', 'text'],
-            {'args': {'foo': 'text'}}
-        ), (
-            ['--foo', 'True'],
-            {'args': {'foo': True}}
-        ), (
-            ['--foo', 'true'],
-            {'args': {'foo': 'true'}}
-        ), (
-            ['--foo', '"True"'],
-            {'args': {'foo': 'True'}}
-        ), (
-            ['--foo.bar.baz', '123'],
-            {'args': {'foo': {'bar': {'baz': 123}}}}
-        ), (
-            ['--foo.bar', '123', '--foo.baz', '"321"'],
-            {'args': {'foo': {'bar': 123, 'baz': '321'}}}
-        ), (
-            ['--foo', ''],
-            {'args': {'foo': ''}}
-        ), (
-            ['--foo', 'None'],
-            {'args': {'foo': None}}
-        ), (
-            ['--foo.bar', '[1,2,3]'],
-            {'args': {'foo': {'bar': [1, 2, 3]}}}
-        ), (
-            ['--foo.bar', '["1"]'],
-            {'args': {'foo': {'bar': ['1']}}}
-        ), (
-            ['--foo.bar', '{"baz": 123}'],
-            {'args': {'foo': {'bar': {'baz': 123}}}}
-        ), (
-            ['--foo.bar', '{"baz": "123"}'],
-            {'args': {'foo': {'bar': {'baz': '123'}}}}
-        ), (
-            ['--foo', '1.2'],
-            {'args': {'foo': 1.2}}
-        ), (
-            ['--foo', '"1.2"'],
-            {'args': {'foo': '1.2'}}
-        ), (
-            ['--foo', 'John Doe'],
-            {'args': {'foo': 'John Doe'}}
-        )
+        (['--foo', '123'], {'args': {'foo': 123}}),
+        (['--foo', '"123"'], {'args': {'foo': '123'}}),
+        (['--foo.bar', '123'], {'args': {'foo': {'bar': 123}}}),
+        (['--foo', 'text'], {'args': {'foo': 'text'}}),
+        (['--foo', 'True'], {'args': {'foo': True}}),
+        (['--foo', 'true'], {'args': {'foo': 'true'}}),
+        (['--foo', '"True"'], {'args': {'foo': 'True'}}),
+        (['--foo.bar.baz', '123'], {'args': {'foo': {'bar': {'baz': 123}}}}),
+        (['--foo.bar', '123', '--foo.baz', '"321"'], {'args': {'foo': {'bar': 123, 'baz': '321'}}}),
+        (['--foo', ''], {'args': {'foo': ''}}),
+        (['--foo', 'None'], {'args': {'foo': None}}),
+        (['--foo.bar', '[1,2,3]'], {'args': {'foo': {'bar': [1, 2, 3]}}}),
+        (['--foo.bar', '["1"]'], {'args': {'foo': {'bar': ['1']}}}),
+        (['--foo.bar', '{"baz": 123}'], {'args': {'foo': {'bar': {'baz': 123}}}}),
+        (['--foo.bar', '{"baz": "123"}'], {'args': {'foo': {'bar': {'baz': '123'}}}}),
+        (['--foo', '1.2'], {'args': {'foo': 1.2}}),
+        (['--foo', '"1.2"'], {'args': {'foo': '1.2'}}),
+        (['--foo', 'John Doe'], {'args': {'foo': 'John Doe'}}),
     ]
 
 
-@pytest.mark.parametrize('argv, expected', samples_config_factory_arguments())
+@pytest.mark.parametrize(('argv', 'expected'), samples_config_factory_arguments())
 def test_config_factory_arguments(argv, expected):
-    with mock.patch.object(sys, 'argv', ['test.py'] + argv):
+    with mock.patch.object(sys, 'argv', ['test.py', *argv]):
         actual = ConfigFactory.arguments()
 
         assert actual == Config(expected)
@@ -612,7 +575,7 @@ def test_config_factory_file_not_found():
 
 def test_config_factory_unsupported_file_type():
     with mock.patch('builtins.open', mock.mock_open(read_data='foo: bar')) as mock_file:
-        with pytest.raises(ConfigException, match='no format parser found for file config.conf'):
+        with pytest.raises(ConfigException, match=r'no format parser found for file config.conf'):
             ConfigFactory.from_file('config.conf')
 
         mock_file.assert_not_called()
@@ -643,9 +606,9 @@ def test_config_factory_default_load_not_found():
         actual = ConfigFactory.default_load()
 
         assert actual == Config({'foo': 'bar'})
-        mock_load.assert_has_calls([
-            mock.call('application.json'), mock.call('application.yaml'), mock.call('application.ini')
-        ])
+        mock_load.assert_has_calls(
+            [mock.call('application.json'), mock.call('application.yaml'), mock.call('application.ini')]
+        )
 
 
 def test_config_factory_default_load_use_arguments():
@@ -673,9 +636,7 @@ def test_config_factory_default_load_raise_resolve_error():
         with pytest.raises(ConfigException, match='any resolve error'):
             ConfigFactory.default_load()
 
-        mock_load.assert_has_calls([
-            mock.call('application.json'), mock.call('application.yaml')
-        ])
+        mock_load.assert_has_calls([mock.call('application.json'), mock.call('application.yaml')])
 
 
 def test_local_file_config_reader():
