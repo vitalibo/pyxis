@@ -2,8 +2,7 @@ from unittest import mock
 
 import pytest
 from pyspark import SparkConf, SparkContext
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql import functions as fn
+from pyspark.sql import DataFrame, SparkSession, functions as fn
 from pyspark.sql.types import StructType
 
 from pyxis.pyspark import Job, LocalTestSpark, Sink, Source, Spark

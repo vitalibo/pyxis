@@ -15,7 +15,7 @@ from pyxis.config import (
     IniConfigParser,
     JsonConfigParser,
     LocalFileConfigReader,
-    YamlConfigParser
+    YamlConfigParser,
 )
 from pyxis.functions import function
 

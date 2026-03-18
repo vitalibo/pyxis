@@ -19,7 +19,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
-    overload
+    overload,
 )
 
 from .functions import identity, require_not_none
